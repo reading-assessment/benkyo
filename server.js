@@ -7,7 +7,7 @@ var bodyParser = require("body-parser");
 /*************************  Firebase Admin  **************************/
 var admin = require("firebase-admin");
 
-var serviceAccount = require("key/benkyohrapp-firebase-adminsdk-25d6e-9c25f36f7b.json");
+var serviceAccount = require("./key/benkyohrapp-firebase-adminsdk-25d6e-9c25f36f7b.json");
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
@@ -25,5 +25,13 @@ app.listen(app.get('port'), function() {
   console.log('Node app is running on port', app.get('port'));
 });
 
-app.use("/", express.static(__dirname));
+/************************** Importing Files/Fucntions ******************/
+var Users = require("./lib/user");
+var Assessments = require("./lib/assessments");
 
+
+/***************************** Routes ****************************/
+app.use("/", express.static(__dirname));
+app.get('/assessment/get', Assessments.getReleventAssessment)
+app.get('/assessment/update', Assessments.updateReleventAssessment)
+app.get('/assessment/delete', Assessments.deleteReleventAssessment)
