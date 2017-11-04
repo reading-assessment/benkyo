@@ -34,4 +34,6 @@ var Assessments = require("./lib/assessments");
 app.use("/", express.static(__dirname));
 app.get('/assessment/get', Assessments.getReleventAssessment)
 app.get('/assessment/update', Assessments.updateReleventAssessment)
-app.get('/assessment/delete', Assessments.deleteReleventAssessment)
+// app.get('/assessment/delete', Assessments.deleteReleventAssessment)
+app.get('/assessment/getSortedData', Assessments.getAssessmentThroughSort)
+app.get('/assessment/pushData', Assessments.pushReleventAssessment)
