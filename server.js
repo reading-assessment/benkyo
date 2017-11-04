@@ -4,6 +4,18 @@ var app = express();
 var cors = require('cors');
 var bodyParser = require("body-parser");
 
+/*************************  Firebase Admin  **************************/
+var admin = require("firebase-admin");
+
+var serviceAccount = require("key/benkyohrapp-firebase-adminsdk-25d6e-9c25f36f7b.json");
+
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+  databaseURL: "https://benkyohrapp.firebaseio.com"
+});
+
+/*********************Firebase End*****************************/
+
 app.use(cors());
 app.use(bodyParser.json()); // <--- Here
 app.use(bodyParser.urlencoded({extended: true}));
@@ -14,3 +26,4 @@ app.listen(app.get('port'), function() {
 });
 
 app.use("/", express.static(__dirname));
+
