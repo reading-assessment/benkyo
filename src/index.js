@@ -5,6 +5,16 @@ import { BrowserRouter as Router, Route } from 'react-router-dom'
 
 import store from './store'
 
+  var config = {
+    apiKey: "AIzaSyDrK20nhkadydh2tv4_PNFgqQuG64Ygers",
+    authDomain: "benkyohr-e00dc.firebaseapp.com",
+    databaseURL: "https://benkyohr-e00dc.firebaseio.com",
+    projectId: "benkyohr-e00dc",
+    storageBucket: "",
+    messagingSenderId: "385974337950"
+  };
+firebase.initializeApp(config);
+
 /****   Development Mode  ****/
 window.s_mode = {
                   live: false,
