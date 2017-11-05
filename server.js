@@ -7,11 +7,11 @@ var bodyParser = require("body-parser");
 /*************************  Firebase Admin  **************************/
 var admin = require("firebase-admin");
 
-var serviceAccount = require("./key/benkyohrapp-firebase-adminsdk-25d6e-9c25f36f7b.json");
+var serviceAccount = require("./key/benkyohr-e00dc-firebase-adminsdk-125v5-d1fdc86be0.json");
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
-  databaseURL: "https://benkyohrapp.firebaseio.com"
+  databaseURL: "https://benkyohr-e00dc.firebaseio.com"
 });
 
 /*********************Firebase End*****************************/

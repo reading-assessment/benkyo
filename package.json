@@ -49,7 +49,7 @@
   "devDependencies": {},
   "scripts": {
     "start": "node server.js",
-    "dev": "webpack-dev-server --port 9090 --open --config webpack.dev.js && node server.js",
+    "dev": "webpack-dev-server --port 9090 --open --config webpack.dev.js",
     "build": "webpack --config webpack.prod.js"
   },
   "author": "Adam Boettcher <baboettcher@gmail.com>, Ioannis Ioakeimidis <jioakim@gmail.com>, Harsh Sikka <harshsikka123@gmail.com>, Maximilian Kwok <max.kwok@gmail.com>",

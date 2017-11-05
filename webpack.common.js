@@ -8,6 +8,7 @@ require("firebase/firestore");
 module.exports = {
   entry:  [
             './src/components/App.jsx',
+            './src/components/NavigationHeader.jsx',
             './src/components/Login/Login.jsx',
             './src/components/Dashboard/Dashboard.jsx',
             './src/index.js'
