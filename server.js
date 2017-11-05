@@ -28,12 +28,16 @@ app.listen(app.get('port'), function() {
 /************************** Importing Files/Fucntions ******************/
 var Users = require("./lib/user");
 var Assessments = require("./lib/assessments");
-
+var Classroom = require("./lib/classroom");
 
 /***************************** Routes ****************************/
 app.use("/", express.static(__dirname));
 app.get('/assessment/get', Assessments.getReleventAssessment)
 app.get('/assessment/update', Assessments.updateReleventAssessment)
-// app.get('/assessment/delete', Assessments.deleteReleventAssessment)
 app.get('/assessment/getSortedData', Assessments.getAssessmentThroughSort)
 app.get('/assessment/pushData', Assessments.pushReleventAssessment)
+// app.get('/assessment/delete', Assessments.deleteReleventAssessment)
+
+
+app.all('/teacher/getToken', Classroom.getGoogleClassOAuthToken);
+app.all('/teacher/importClassroom', Classroom.getGoogleClassRoomData);
