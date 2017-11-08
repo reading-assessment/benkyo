@@ -1,7 +1,7 @@
 import { Button, Form, Header, Message, Grid, Segment } from 'semantic-ui-react'
 import axios from 'axios'
 import { connect } from 'react-redux';
-import { SetAuthenticatedUID } from './LoginActions'
+import { SetAuthenticatedUID } from './TeacherLoginActions'
 
 @connect((store) => {
   return {
@@ -9,7 +9,7 @@ import { SetAuthenticatedUID } from './LoginActions'
   }
 })
 
-class Login extends React.Component {
+class TeacherLogin extends React.Component {
   constructor(props){
     super(props);
     this.state = {
@@ -61,4 +61,4 @@ class Login extends React.Component {
   }
 };
 
-window.Login = Login;
+window.TeacherLogin = TeacherLogin;

@@ -6,7 +6,8 @@ import {SetMainView, SetUserCred} from './AuthenticateActions'
 @connect((store) => {
   return {
     user_cred: store.authentication.user_cred,
-    change_main_view: store.authentication.change_main_view
+    change_main_view: store.authentication.change_main_view,
+    role: store.authentication.role
   }
 })
 
@@ -35,12 +36,20 @@ class App extends React.Component {
   }
 
   render() {
-    const { user_cred, change_main_view } = this.props;
+    const { user_cred, change_main_view, role } = this.props;
 
     if (change_main_view === 'Login') {
-      var renderLogin = (
-        <Login/>
-      )
+      if (role === 'Teacher'){
+        var renderLogin = (
+          <TeacherLogin/>
+        )
+      } else if (role === 'Student') {
+        var renderLogin = (
+          <div>
+            This is where the student login is
+          </div>
+        )
+      }
     } else if (change_main_view === 'Landing Page') {
       var renderLogin = (
         <Segment textAlign='center'>
