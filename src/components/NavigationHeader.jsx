@@ -17,15 +17,31 @@ class NavigationHeader extends React.Component {
     this.state = {
 
     }
+    this.LogOut = this.LogOut.bind(this);
+  }
+
+  LogOut() {
+    firebase.auth().signOut().then(function() {
+      // Sign-out successful.
+    }).catch(function(error) {
+      // An error happened.
+    });
   }
 
   render(){
     const {user_cred, role} = this.props;
 
-    if (role === 'Teacher') {
-      var renderImportClassRoom = (
-        <Dropdown.Item>
-          <a target='_blank' href={`${window.s_mode.base_url}/teacher/getToken?uid=${user_cred.uid}`}>Import Google Classroom</a>
+    if (user_cred.uid){
+      if (role === 'Teacher') {
+        var renderImportClassRoom = (
+          <Dropdown.Item>
+            <a target='_blank' href={`${window.s_mode.base_url}/teacher/getToken?uid=${user_cred.uid}`}>Import Google Classroom</a>
+          </Dropdown.Item>
+        )
+      }
+      var renderLogout = (
+        <Dropdown.Item onClick={this.LogOut}>
+          Log Out
         </Dropdown.Item>
       )
     }
@@ -41,8 +57,9 @@ class NavigationHeader extends React.Component {
           <Menu.Menu position='right'>
             <Dropdown item icon='user circle outline' simple>
               <Dropdown.Menu>
-                <Dropdown.Item>Hi {user_cred.displayName}</Dropdown.Item>
+                <Dropdown.Item>Hi{(user_cred.uid)?` ${user_cred.displayName}`:`, Please Login as ${role}`}</Dropdown.Item>
                 {renderImportClassRoom}
+                {renderLogout}
               </Dropdown.Menu>
             </Dropdown>
           </Menu.Menu>

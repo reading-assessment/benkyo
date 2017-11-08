@@ -9,7 +9,7 @@ module.exports = {
   entry:  [
             './src/components/App.jsx',
             './src/components/NavigationHeader.jsx',
-            './src/components/Login/Login.jsx',
+            './src/components/Teachers/Login/TeacherLogin.jsx',
             './src/components/Teachers/TeacherDashboard.jsx',
             './src/index.js'
           ],
