@@ -1,4 +1,4 @@
-class Dashboard extends React.Component {
+class TeacherDashboard extends React.Component {
   constructor(props){
     super(props);
     this.state = {
@@ -8,11 +8,10 @@ class Dashboard extends React.Component {
   render() {
     return (
       <div>
-        <br/>
-        <Login/>
+        TeacherDashboard
       </div>
     )
   }
 }
 
-window.Dashboard = Dashboard;
+window.TeacherDashboard = TeacherDashboard;
