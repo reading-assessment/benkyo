@@ -15,3 +15,12 @@ export function SetUserCred (user_cred) {
     }
   }
 }
+
+export function SetMainRole (role) {
+  return {
+    type: 'SET_ROLE',
+    payload: {
+      role: role
+    }
+  }
+}

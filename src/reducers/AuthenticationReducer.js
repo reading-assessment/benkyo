@@ -1,5 +1,6 @@
 export default function reducer( state = {
-  uid: 'Fountas & Pinnel',
+  uid: null,
+  role: 'Student',
   user_cred: {},
   change_main_view: 'Landing_Page'
   }, action ) {
@@ -18,6 +19,11 @@ export default function reducer( state = {
     case 'SET_MAIN_VIEW': {
       return {...state,
         change_main_view: action.payload.change_main_view
+      }
+    }
+    case 'SET_ROLE': {
+      return {...state,
+        role: action.payload.role
       }
     }
   }
