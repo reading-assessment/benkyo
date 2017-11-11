@@ -11,6 +11,8 @@ module.exports = {
             './src/components/NavigationHeader.jsx',
             './src/components/Teachers/Login/TeacherLogin.jsx',
             './src/components/Teachers/TeacherDashboard.jsx',
+            './src/components/Students/Login/StudentLogin.jsx',
+            './src/components/Students/StudentDashboard.jsx',
             './src/index.js'
           ],
   output: {
