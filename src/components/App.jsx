@@ -45,17 +45,21 @@ class App extends React.Component {
         )
       } else if (role === 'Student') {
         var renderLogin = (
-          <div>
-            This is where the student login is
-          </div>
+          <StudentLogin/>
         )
       }
     } else if (change_main_view === 'Landing Page') {
-      var renderLogin = (
-        <Segment textAlign='center'>
-          Main View
-        </Segment>
-      )
+      if (role === 'Teacher'){
+        var renderLogin = (
+          <TeacherDashboard/>
+        )
+      } else if (role === 'Student') {
+        var renderLogin = (
+          <div>
+            This is where the student dashboard is
+          </div>
+        )
+      }
     }
 
     return (
