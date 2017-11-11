@@ -1,5 +1,16 @@
+import { Table, Checkbox, Button, Icon } from 'semantic-ui-react';
+import { connect } from 'react-redux';
+import axios from 'axios';
+
 const dummyData = [
-  {}
+  { studentName: 'Juan', rawScore: 54, studentReading: 'this is a reading', AssignedAssessment: 'Assessment P, Version 3'},
+  { studentName: 'Juan', rawScore: 54, studentReading: 'this is a reading', AssignedAssessment: 'Assessment P, Version 3'},
+  { studentName: 'Juan', rawScore: 54, studentReading: 'this is a reading', AssignedAssessment: 'Assessment P, Version 3'},
+  { studentName: 'Juan', rawScore: 54, studentReading: 'this is a reading', AssignedAssessment: 'Assessment P, Version 3'},
+  { studentName: 'Juan', rawScore: 54, studentReading: 'this is a reading', AssignedAssessment: 'Assessment P, Version 3'},
+  { studentName: 'Juan', rawScore: 54, studentReading: 'this is a reading', AssignedAssessment: 'Assessment P, Version 3'},
+  { studentName: 'Juan', rawScore: 54, studentReading: 'this is a reading', AssignedAssessment: 'Assessment P, Version 3'},
+  { studentName: 'Juan', rawScore: 54, studentReading: 'this is a reading', AssignedAssessment: 'Assessment P, Version 3'}
 ]
 
 class TeacherDashboard extends React.Component {
@@ -15,38 +26,28 @@ class TeacherDashboard extends React.Component {
         <Table.Header>
           <Table.Row>
             <Table.HeaderCell />
-            <Table.HeaderCell>Name</Table.HeaderCell>
+            <Table.HeaderCell>Student Name</Table.HeaderCell>
+            <Table.HeaderCell>Raw Score</Table.HeaderCell>
+            <Table.HeaderCell>Student Reading</Table.HeaderCell>
+            <Table.HeaderCell>Assigned Assessment</Table.HeaderCell>
           </Table.Row>
         </Table.Header>
 
         <Table.Body>
-          <Table.Row>
-            <Table.Cell collapsing>
-              <Checkbox slider />
-            </Table.Cell>
-            <Table.Cell>John Lilki</Table.Cell>
-            <Table.Cell>September 14, 2013</Table.Cell>
-            <Table.Cell>jhlilk22@yahoo.com</Table.Cell>
-            <Table.Cell>No</Table.Cell>
-          </Table.Row>
-          <Table.Row>
-            <Table.Cell collapsing>
-              <Checkbox slider />
-            </Table.Cell>
-            <Table.Cell>Jamie Harington</Table.Cell>
-            <Table.Cell>January 11, 2014</Table.Cell>
-            <Table.Cell>jamieharingonton@yahoo.com</Table.Cell>
-            <Table.Cell>Yes</Table.Cell>
-          </Table.Row>
-          <Table.Row>
-            <Table.Cell collapsing>
-              <Checkbox slider />
-            </Table.Cell>
-            <Table.Cell>Jill Lewis</Table.Cell>
-            <Table.Cell>May 11, 2014</Table.Cell>
-            <Table.Cell>jilsewris22@yahoo.com</Table.Cell>
-            <Table.Cell>Yes</Table.Cell>
-          </Table.Row>
+          {dummyData.map((performance)=>{
+            return (
+              <Table.Row>
+                <Table.Cell collapsing>
+                  <Checkbox slider />
+                </Table.Cell>
+                <Table.Cell>{performance.studentName}</Table.Cell>
+                <Table.Cell>{performance.rawScore}</Table.Cell>
+                <Table.Cell>{performance.studentReading}</Table.Cell>
+                <Table.Cell>{performance.AssignedAssessment}</Table.Cell>
+              </Table.Row>
+            )
+          })}
+
         </Table.Body>
 
         <Table.Footer fullWidth>
