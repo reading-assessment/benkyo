@@ -43,4 +43,4 @@ app.all('/teacher/getToken', Classroom.getGoogleClassOAuthToken);
 app.all('/teacher/importClassroom', Classroom.getGoogleClassRoomData);
 
 /***************************** Student Routes ****************************/
-// app.get('/student/sendData', Students.sendTranscribedAssessment()) 
+ app.get('/student/sendData', Students.sendTranscribedAssessment) 
