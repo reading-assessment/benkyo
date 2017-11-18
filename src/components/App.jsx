@@ -68,6 +68,7 @@ class App extends React.Component {
         <Container style={{marginTop: '70px'}}>
           {renderLogin}
         </Container>
+        <AssessmentRecording/>
       </div>
     )
   }
