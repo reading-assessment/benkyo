@@ -15,10 +15,16 @@ import store from './store'
   };
 firebase.initializeApp(config);
 
-/****   Development Mode  ****/
+// /****   Development Mode  ****/
+// window.s_mode = {
+//                   live: false,
+//                   base_url: 'http://127.0.0.1:3000',
+//                 }
+
+/****   Production Mode  ****/
 window.s_mode = {
                   live: false,
-                  base_url: 'http://127.0.0.1:3000',
+                  base_url: 'https://boiling-hollows-85549.herokuapp.com/',
                 }
 
 const app = document.getElementById('app')
