@@ -19,12 +19,14 @@ firebase.initializeApp(config);
 // window.s_mode = {
 //                   live: false,
 //                   base_url: 'http://127.0.0.1:3000',
+//                   app_server: 'https://localhost:9005'
 //                 }
 
 /****   Production Mode  ****/
 window.s_mode = {
                   live: false,
                   base_url: 'https://boiling-hollows-85549.herokuapp.com/',
+                  app_server: 'https://165.227.174.222:9005/'
                 }
 
 const app = document.getElementById('app')

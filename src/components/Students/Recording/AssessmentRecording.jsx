@@ -1,7 +1,7 @@
 import { Button, Form, Header, Message, Grid, Segment, Progress, Container } from 'semantic-ui-react'
 import axios from 'axios'
 import { connect } from 'react-redux';
-import Recorder from 'recorderjs';
+import Recorder from './recorder';
 import io from 'socket.io-client';
 import ss from 'socket.io-stream';
 
@@ -13,6 +13,8 @@ class AssessmentRecording extends React.Component{
       recording_started: false,
       input: null,
       recorder: null,
+      percentComplete: 0,
+      finishedRecording: false
     }
     this.startRecording = this.startRecording.bind(this);
     this.stopRecording = this.stopRecording.bind(this);
@@ -59,6 +61,7 @@ class AssessmentRecording extends React.Component{
   * optional and specifies the format to export the blob either wav or mp3
   */
   cleanAudioBlob(blob) {
+    console.log('cleanAudioBlob')
     // Note:
     // Use the AudioBLOB for whatever you need, to download
     // directly in the browser, to upload to the server, you name it !
@@ -69,27 +72,28 @@ class AssessmentRecording extends React.Component{
 
     // ----------------JOHN CODE----------------------------
     // Sockets.io and socketio-stream code
-    var URL_SERVER = 'https://localhost:9005';
+    var URL_SERVER = window.s_mode.app_server;
     // io is a globally available variable from socketio cdn that is imported
     var socket = io.connect(URL_SERVER);
     // ss is socketio-stream globally available variable from imported file
     var socketioStream = ss.createStream();
     ss(socket).emit('client-stream-request', socketioStream, {
-      wavFileSize: AudioBLOB.size,
+      wavFileSize: blob.size,
       studentName : document.getElementById('btnStudentName').value
     }, (confirmation) =>{
       console.log(confirmation);
       socket.disconnect(URL_SERVER);
       this.setState({finishedRecording: true});
     });
-    var blobStream = ss.createBlobReadStream(AudioBLOB);
+    var blobStream = ss.createBlobReadStream(blob);
     var size = 0;
-    var progressBar = document.getElementsByTagName('progress')[0];
+
     blobStream.on('data', function(chunk){
       size += chunk.length;
-      progressBar.setAttribute('value', String(size / AudioBLOB.size * 100));
+
+      this.setState({percentComplete: size / blob.size * 100})
       // console.log(Math.floor(size / AudioBLOB.size * 100) + '%');
-    });
+    }.bind(this));
     blobStream.pipe(socketioStream);
     // socket.disconnect(URL_SERVER);
     // code before the progress bar
@@ -97,7 +101,7 @@ class AssessmentRecording extends React.Component{
     // -----------------------------------------------------
 
     //------Append wav file to li item and make it available in HTML5 audio player
-    var url = URL.createObjectURL(AudioBLOB);
+    var url = URL.createObjectURL(blob);
     var li = document.createElement('li');
     var au = document.createElement('audio');
     var hf = document.createElement('a');
@@ -148,7 +152,8 @@ class AssessmentRecording extends React.Component{
   }
 
   render() {
-    const {recording_started} = this.state;
+    const {recording_started, percentComplete, finishedRecording} = this.state;
+    console.log(finishedRecording);
     return (
       <Container>
         <h1>Recorder.js export example</h1>
@@ -165,9 +170,8 @@ class AssessmentRecording extends React.Component{
 
         <Header as='h2'>Stored Recordings</Header>
         <ul id="recordingslist"></ul>
-        <Progress value="0" total="100"></Progress>
+        <Progress value="0" total="100" percent={percentComplete} indicating progress='percent'>{(finishedRecording)?('Upload Completed! =D'):null}</Progress>
         <div id="div-red">Please wait until finished message shows to close the browser!
-          <div id="div-finished-message"></div>
         </div>
       </Container>
     )
