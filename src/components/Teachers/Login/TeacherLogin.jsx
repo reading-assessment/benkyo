@@ -2,6 +2,7 @@ import { Button, Form, Header, Message, Grid, Segment } from 'semantic-ui-react'
 import axios from 'axios'
 import { connect } from 'react-redux';
 import { SetAuthenticatedUID } from './TeacherLoginActions'
+import { SetMainRole } from '../../AuthenticateActions'
 
 @connect((store) => {
   return {
@@ -25,12 +26,16 @@ class TeacherLogin extends React.Component {
     firebase.auth().signInWithPopup(provider).then(function(result) {
       // This gives you a Google Access Token. You can use it to access the Google API.
       var token = result.credential.accessToken;
-      console.log(token);
       // The signed-in user info.
       var user = result.user;
-      console.log(user);
+      firebase.database().ref(`roles/${user.uid}`).once('value').then(function(snapshot){
+        if (!snapshot.val()){
+          firebase.database().ref(`roles/${user.uid}`).update({primary:'Teacher'})
+        }
+      })
+      this.prop.dispatch(SetMainRole('Teacher'));
       // ...
-    }).catch(function(error) {
+    }.bind(this)).catch(function(error) {
       // Handle Errors here.
       var errorCode = error.code;
       var errorMessage = error.message;
@@ -54,6 +59,11 @@ class TeacherLogin extends React.Component {
             <Form size='large'>
               <Button color='teal' fluid size='large' onClick={this.LoginWithGoogle}>Login</Button>
             </Form>
+            <Message>
+              Not a Teacher?
+              <br/>
+              <a href='#' onClick={()=>{this.props.dispatch(SetMainRole('Student'))}}>Click Here</a>
+            </Message>
           </Grid.Column>
         </Grid>
       </div>

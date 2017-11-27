@@ -1,8 +1,9 @@
 export default function reducer( state = {
   uid: null,
-  role: 'Student',
+  role: null,
   user_cred: {},
-  change_main_view: 'Landing_Page'
+  change_main_view: 'Landing_Page',
+  classrooms: []
   }, action ) {
 
   switch (action.type) {
@@ -24,6 +25,19 @@ export default function reducer( state = {
     case 'SET_ROLE': {
       return {...state,
         role: action.payload.role
+      }
+    }
+    case 'SET_CLASSROOMS': {
+      return {...state,
+        classrooms: action.payload.classrooms
+      }
+    }
+    case 'LOG_OUT': {
+      return {...state,
+        role: 'Student',
+        user_cred: {},
+        change_main_view: 'Landing_Page',
+        uid: null
       }
     }
   }

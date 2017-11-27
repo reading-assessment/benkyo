@@ -1,13 +1,13 @@
 import { Container, Segment, Menu, Dropdown } from 'semantic-ui-react';
 import { connect } from 'react-redux';
 import axios from 'axios';
-import { SetMainRole } from './AuthenticateActions'
+import { SetMainRole, LogOut } from './AuthenticateActions'
 
 @connect((store) => {
   return {
     user_cred: store.authentication.user_cred,
     change_main_view: store.authentication.change_main_view,
-    role: store.authentication.role
+    role: store.authentication.role,
   }
 })
 
@@ -23,7 +23,8 @@ class NavigationHeader extends React.Component {
   LogOut() {
     firebase.auth().signOut().then(function() {
       // Sign-out successful.
-    }).catch(function(error) {
+      this.props.dispatch(LogOut());
+    }.bind(this)).catch(function(error) {
       // An error happened.
     });
   }
@@ -48,16 +49,10 @@ class NavigationHeader extends React.Component {
     return (
       <Menu fixed='top' size="large">
         <Container>
-          <Dropdown item text={role}>
-            <Dropdown.Menu>
-              <Dropdown.Item onClick={()=>{this.props.dispatch(SetMainRole('Student'))}}>Student</Dropdown.Item>
-              <Dropdown.Item onClick={()=>{this.props.dispatch(SetMainRole('Teacher'))}}>Teacher</Dropdown.Item>
-            </Dropdown.Menu>
-          </Dropdown>
           <Menu.Menu position='right'>
             <Dropdown item icon='user circle outline' simple>
               <Dropdown.Menu>
-                <Dropdown.Item>Hi{(user_cred.uid)?` ${user_cred.displayName}`:`, Please Login as ${role}`}</Dropdown.Item>
+                <Dropdown.Item>Hi{(user_cred.uid)?` ${user_cred.displayName}`:`, Please Login`}</Dropdown.Item>
                 {renderImportClassRoom}
                 {renderLogout}
               </Dropdown.Menu>

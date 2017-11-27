@@ -1,7 +1,7 @@
 import { Container, Segment, Menu } from 'semantic-ui-react';
 import { connect } from 'react-redux';
 import axios from 'axios';
-import {SetMainView, SetUserCred} from './AuthenticateActions'
+import {SetMainView, SetUserCred, SetMainRole} from './AuthenticateActions'
 
 @connect((store) => {
   return {
@@ -27,10 +27,16 @@ class App extends React.Component {
   setAuthState() {
     firebase.auth().onAuthStateChanged(function(user) {
       if (user){
+        firebase.database().ref(`roles/${user.uid}`).once('value').then(function(snapshot){
+          if (snapshot.val()){
+            this.props.dispatch(SetMainRole(snapshot.val().primary));
+          }
+        }.bind(this))
         this.props.dispatch(SetMainView('Landing Page'));
         this.props.dispatch(SetUserCred(user));
       } else {
         this.props.dispatch(SetMainView('Login'));
+        this.props.dispatch(SetMainRole('Student'));
       }
     }.bind(this));
   }
@@ -56,8 +62,12 @@ class App extends React.Component {
       } else if (role === 'Student') {
         var renderLogin = (
           <div>
-            This is where the student dashboard is
+            <AssessmentRecording/>
           </div>
+        )
+      } else {
+        var renderLogin = (
+          <VerifyRole/>
         )
       }
     }
@@ -68,7 +78,6 @@ class App extends React.Component {
         <Container style={{marginTop: '70px'}}>
           {renderLogin}
         </Container>
-        <AssessmentRecording/>
       </div>
     )
   }

@@ -1,7 +1,7 @@
 import { Button, Form, Header, Message, Grid, Segment, Progress, Container } from 'semantic-ui-react'
 import axios from 'axios'
 import { connect } from 'react-redux';
-import Recorder from './recorder';
+import Recorder from 'recorderjs';
 import io from 'socket.io-client';
 import ss from 'socket.io-stream';
 
