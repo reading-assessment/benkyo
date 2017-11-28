@@ -1,17 +1,24 @@
 import { Table, Checkbox, Button, Icon, Segment, Grid } from 'semantic-ui-react';
 import { connect } from 'react-redux';
 import axios from 'axios';
+import { SetAllClassrooms, SetCurrentClassrooms } from './TeacherActions'
 
-const dummyData = [
-  { studentName: 'Juan', rawScore: 54, studentReading: 'this is a reading', AssignedAssessment: 'Assessment P, Version 3'},
-  { studentName: 'Juan', rawScore: 54, studentReading: 'this is a reading', AssignedAssessment: 'Assessment P, Version 3'},
-  { studentName: 'Juan', rawScore: 54, studentReading: 'this is a reading', AssignedAssessment: 'Assessment P, Version 3'},
-  { studentName: 'Juan', rawScore: 54, studentReading: 'this is a reading', AssignedAssessment: 'Assessment P, Version 3'},
-  { studentName: 'Juan', rawScore: 54, studentReading: 'this is a reading', AssignedAssessment: 'Assessment P, Version 3'},
-  { studentName: 'Juan', rawScore: 54, studentReading: 'this is a reading', AssignedAssessment: 'Assessment P, Version 3'},
-  { studentName: 'Juan', rawScore: 54, studentReading: 'this is a reading', AssignedAssessment: 'Assessment P, Version 3'},
-  { studentName: 'Juan', rawScore: 54, studentReading: 'this is a reading', AssignedAssessment: 'Assessment P, Version 3'}
-]
+@connect((store) => {
+  return {
+    user_cred: store.authentication.user_cred,
+    dummyData: [
+      { studentName: 'Juan', rawScore: 54, studentReading: 'this is a reading', AssignedAssessment: 'Assessment P, Version 3'},
+      { studentName: 'Juan', rawScore: 54, studentReading: 'this is a reading', AssignedAssessment: 'Assessment P, Version 3'},
+      { studentName: 'Juan', rawScore: 54, studentReading: 'this is a reading', AssignedAssessment: 'Assessment P, Version 3'},
+      { studentName: 'Juan', rawScore: 54, studentReading: 'this is a reading', AssignedAssessment: 'Assessment P, Version 3'},
+      { studentName: 'Juan', rawScore: 54, studentReading: 'this is a reading', AssignedAssessment: 'Assessment P, Version 3'},
+      { studentName: 'Juan', rawScore: 54, studentReading: 'this is a reading', AssignedAssessment: 'Assessment P, Version 3'},
+      { studentName: 'Juan', rawScore: 54, studentReading: 'this is a reading', AssignedAssessment: 'Assessment P, Version 3'},
+      { studentName: 'Juan', rawScore: 54, studentReading: 'this is a reading', AssignedAssessment: 'Assessment P, Version 3'}
+    ]
+  }
+})
+
 
 class TeacherDashboard extends React.Component {
   constructor(props){
@@ -20,7 +27,28 @@ class TeacherDashboard extends React.Component {
     }
   }
 
+  componentDidMount() {
+    const{user_cred, classrooms} = this.props;
+    firebase.database().ref(`teacher/${user_cred.uid}/classes`).once('value').then(function(snapshot){
+      var arrayOfClasses = [];
+      var currentClassroom = null;
+      snapshot.forEach(function(classes){
+        arrayOfClasses.push(classes.val());
+        if (!currentClassroom) {
+          currentClassroom = classes.val();
+          firebase.database().ref(`/classes/${currentClassroom}`).once('value').then(function(snapshot){
+            if (snapshot.val()){
+              this.props.dispatch(SetCurrentClassrooms(snapshot.val()));
+            }
+          }.bind(this))
+        }
+      }.bind(this));
+      this.props.dispatch(SetAllClassrooms(arrayOfClasses));
+    }.bind(this))
+  }
+
   render() {
+    const {dummyData} = this.props;
     return (
       <Segment vertical>
         <Grid>
