@@ -30,6 +30,23 @@ class App extends React.Component {
         firebase.database().ref(`roles/${user.uid}`).once('value').then(function(snapshot){
           if (snapshot.val()){
             this.props.dispatch(SetMainRole(snapshot.val().primary));
+            if (snapshot.val().primary === 'Student'){
+              firebase.database().ref(`classes`).once('value').then(function(snapshot){
+                snapshot.forEach(function(classroom){
+                  var students = classroom.val().students;
+                  for (var id in students){
+                    if (students[id].profile.emailAddress === user.email){
+                      var obj = students[id].profile;
+                      firebase.database().ref(`student/${user.uid}/meta`).update(obj);
+
+                      var newClass = {};
+                      newClass[students[id].courseId] = true;
+                      firebase.database().ref(`student/${user.uid}/classes`).update(newClass);
+                    }
+                  }
+                })
+              })
+            }
           }
         }.bind(this))
         this.props.dispatch(SetMainView('Landing Page'));
@@ -62,7 +79,7 @@ class App extends React.Component {
       } else if (role === 'Student') {
         var renderLogin = (
           <div>
-            <AssessmentRecording/>
+            <StudentDashboard/>
           </div>
         )
       } else {
