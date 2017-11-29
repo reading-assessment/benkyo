@@ -24,3 +24,9 @@ export function SetMainRole (role) {
     }
   }
 }
+
+export function LogOut () {
+  return {
+    type: 'LOG_OUT'
+  }
+}

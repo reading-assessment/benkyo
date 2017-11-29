@@ -9,8 +9,11 @@ module.exports = {
   entry:  [
             './src/components/App.jsx',
             './src/components/NavigationHeader.jsx',
+            './src/components/VerifyRole/VerifyRole.jsx',
             './src/components/Teachers/Login/TeacherLogin.jsx',
             './src/components/Teachers/TeacherDashboard.jsx',
+            './src/components/Teachers/AssignAssessment.jsx',
+            './src/components/Teachers/ClassroomByGoogle.jsx',
             './src/components/Students/Login/StudentLogin.jsx',
             './src/components/Students/Recording/AssessmentRecording.jsx',
             './src/components/Students/StudentDashboard.jsx',

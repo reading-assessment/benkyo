@@ -1,9 +1,16 @@
 import { Button, Form, Header, Message, Grid, Segment, Progress, Container } from 'semantic-ui-react'
 import axios from 'axios'
 import { connect } from 'react-redux';
-import Recorder from './recorder';
+import Recorder from 'recorderjs';
 import io from 'socket.io-client';
 import ss from 'socket.io-stream';
+
+@connect((store) => {
+  return {
+    user_cred: store.authentication.user_cred,
+    role: store.authentication.role
+  }
+})
 
 class AssessmentRecording extends React.Component{
   constructor (props) {
@@ -36,15 +43,15 @@ class AssessmentRecording extends React.Component{
       window.audio_stream = stream;
       // Create the MediaStreamSource for the Recorder library
       window.input = audioContext.createMediaStreamSource(stream);
-      console.log('Media stream succesfully created');
+      // console.log('Media stream succesfully created');
 
       // Initialize the Recorder Library (custom)
       window.recorder = new Recorder(window.input);
-      console.log('Recorder initialised');
+      // console.log('Recorder initialised');
 
       // Start recording !
       window.recorder && window.recorder.record();
-      console.log('Recorder started');
+      // console.log('Recorder started');
       this.setState({recording_started: true});
 
       // Disable Record button and enable stop button !
@@ -61,7 +68,8 @@ class AssessmentRecording extends React.Component{
   * optional and specifies the format to export the blob either wav or mp3
   */
   cleanAudioBlob(blob) {
-    console.log('cleanAudioBlob')
+    // console.log('cleanAudioBlob')
+    const {user_cred} = this.props;
     // Note:
     // Use the AudioBLOB for whatever you need, to download
     // directly in the browser, to upload to the server, you name it !
@@ -79,12 +87,12 @@ class AssessmentRecording extends React.Component{
     var socketioStream = ss.createStream();
     ss(socket).emit('client-stream-request', socketioStream, {
       wavFileSize: blob.size,
-      studentName : document.getElementById('btnStudentName').value
-    }, (confirmation) =>{
-      console.log(confirmation);
+      studentName : user_cred.uid
+    }, function(confirmation) {
+      // console.log(confirmation);
       socket.disconnect(URL_SERVER);
       this.setState({finishedRecording: true});
-    });
+    }.bind(this));
     var blobStream = ss.createBlobReadStream(blob);
     var size = 0;
 
@@ -123,7 +131,7 @@ class AssessmentRecording extends React.Component{
   stopRecording(callback, AudioFormat) {
     // Stop the recorder instance
     window.recorder && window.recorder.stop();
-    console.log('Stopped recording.');
+    // console.log('Stopped recording.');
 
     // Stop the getUserMedia Audio Stream !
     // HTML5
@@ -153,26 +161,16 @@ class AssessmentRecording extends React.Component{
 
   render() {
     const {recording_started, percentComplete, finishedRecording} = this.state;
-    console.log(finishedRecording);
     return (
       <Container>
-        <h1>Recorder.js export example</h1>
-
-        <p>Make sure you are using a recent version of Google Chrome.</p>
-        <p>Also before you enable microphone input either plug in headphones or turn the volume down if you want to avoid ear splitting
-          feedback!
-        </p>
-
-        <input type="text" placeholder="student name" required id="btnStudentName"/>
-
-        <Button disabled={recording_started} onClick={this.startRecording}>Start recording</Button>
-        <Button disabled={!recording_started} onClick={this.stopRecording}>Stop recording</Button>
+        <Button.Group labeled icon fluid>
+          <Button disabled={recording_started} onClick={this.startRecording} icon='unmute' content='Start Recording' color='green'/>
+          <Button disabled={!recording_started} onClick={this.stopRecording} icon='stop' content='Stop recording' color='red'/>
+        </Button.Group>
 
         <Header as='h2'>Stored Recordings</Header>
-        <ul id="recordingslist"></ul>
-        <Progress value="0" total="100" percent={percentComplete} indicating progress='percent'>{(finishedRecording)?('Upload Completed! =D'):null}</Progress>
-        <div id="div-red">Please wait until finished message shows to close the browser!
-        </div>
+        <ol id="recordingslist"></ol>
+        <Progress value="0" total="100" percent={Math.floor(percentComplete)} indicating progress='percent'>{(finishedRecording)?('Upload Completed! =D'):null}</Progress>
       </Container>
     )
   }

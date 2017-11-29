@@ -1,7 +1,7 @@
 import { Container, Segment, Menu } from 'semantic-ui-react';
 import { connect } from 'react-redux';
 import axios from 'axios';
-import {SetMainView, SetUserCred} from './AuthenticateActions'
+import {SetMainView, SetUserCred, SetMainRole} from './AuthenticateActions'
 
 @connect((store) => {
   return {
@@ -27,10 +27,33 @@ class App extends React.Component {
   setAuthState() {
     firebase.auth().onAuthStateChanged(function(user) {
       if (user){
+        firebase.database().ref(`roles/${user.uid}`).once('value').then(function(snapshot){
+          if (snapshot.val()){
+            this.props.dispatch(SetMainRole(snapshot.val().primary));
+            if (snapshot.val().primary === 'Student'){
+              firebase.database().ref(`classes`).once('value').then(function(snapshot){
+                snapshot.forEach(function(classroom){
+                  var students = classroom.val().students;
+                  for (var id in students){
+                    if (students[id].profile.emailAddress === user.email){
+                      var obj = students[id].profile;
+                      firebase.database().ref(`student/${user.uid}/meta`).update(obj);
+
+                      var newClass = {};
+                      newClass[students[id].courseId] = true;
+                      firebase.database().ref(`student/${user.uid}/classes`).update(newClass);
+                    }
+                  }
+                })
+              })
+            }
+          }
+        }.bind(this))
         this.props.dispatch(SetMainView('Landing Page'));
         this.props.dispatch(SetUserCred(user));
       } else {
         this.props.dispatch(SetMainView('Login'));
+        this.props.dispatch(SetMainRole('Student'));
       }
     }.bind(this));
   }
@@ -56,8 +79,12 @@ class App extends React.Component {
       } else if (role === 'Student') {
         var renderLogin = (
           <div>
-            This is where the student dashboard is
+            <StudentDashboard/>
           </div>
+        )
+      } else {
+        var renderLogin = (
+          <VerifyRole/>
         )
       }
     }
@@ -68,7 +95,6 @@ class App extends React.Component {
         <Container style={{marginTop: '70px'}}>
           {renderLogin}
         </Container>
-        <AssessmentRecording/>
       </div>
     )
   }
