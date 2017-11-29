@@ -1,7 +1,7 @@
 import { Table, Checkbox, Button, Icon, Segment, Grid } from 'semantic-ui-react';
 import { connect } from 'react-redux';
 import axios from 'axios';
-import { SetAllClassrooms, SetCurrentClassrooms } from './TeacherActions'
+import { SetAllClassrooms, SetCurrentClassrooms, StoreAllAssessments } from './TeacherActions'
 
 @connect((store) => {
   return {
@@ -45,6 +45,10 @@ class TeacherDashboard extends React.Component {
       }.bind(this));
       this.props.dispatch(SetAllClassrooms(arrayOfClasses));
     }.bind(this))
+
+    firebase.database().ref(`assessments`).once('value').then(function(snapshot){
+      this.props.dispatch(StoreAllAssessments(snapshot.val()))
+    }.bind(this))
   }
 
   render() {
@@ -54,6 +58,7 @@ class TeacherDashboard extends React.Component {
         <Grid>
           <Grid.Row>
             <Grid.Column width={11}>
+              <AssignAssessment/>
               <Table compact celled definition>
                 <Table.Header>
                   <Table.Row>

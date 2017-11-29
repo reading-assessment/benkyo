@@ -1,7 +1,7 @@
 import { Card, Feed } from 'semantic-ui-react';
 import { connect } from 'react-redux';
 import axios from 'axios';
-import { SetAllClassrooms, SetCurrentClassrooms } from './TeacherActions'
+import { SetAllClassrooms, SetCurrentClassrooms, SetTargetStudent, ResetSelectAssessment } from './TeacherActions'
 import Promise from 'bluebird'
 
 @connect((store) => {
@@ -33,7 +33,7 @@ class ClassroomByGoogle extends React.Component {
         <Feed>
           {studentArray.map(function(student, key){
             return(
-              <Feed.Event>
+              <Feed.Event as='a' onClick={()=>{this.props.dispatch(SetTargetStudent(student)); this.props.dispatch(ResetSelectAssessment())}}>
                 <Feed.Label image={student.profile.photoUrl} />
                 <Feed.Content>
                   <Feed.Date content={student.profile.name.fullName} />
@@ -43,7 +43,7 @@ class ClassroomByGoogle extends React.Component {
                 </Feed.Content>
               </Feed.Event>
             )
-          })}
+          }.bind(this))}
         </Feed>
       )
     }
