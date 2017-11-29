@@ -114,7 +114,7 @@ class AssignAssessment extends React.Component{
       )
     }
     return (
-      <Segment vertical>
+      <Segment vertical style={{paddingTop: '0px'}}>
         {renderAssignment}
       </Segment>
     )
