@@ -33,7 +33,7 @@ class AssignAssessment extends React.Component{
       studentID: current_target_student.userId,
       studentInfo: current_target_student.profile,
       courseID: current_target_student.courseId,
-      assignment: '-' + selected_assessment
+      assessment: '-' + selected_assessment
     };
     firebase.database().ref(`assignment`).push(obj);
     this.props.dispatch(AssignItinStone());

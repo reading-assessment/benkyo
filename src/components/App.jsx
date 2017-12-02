@@ -1,7 +1,7 @@
 import { Container, Segment, Menu } from 'semantic-ui-react';
 import { connect } from 'react-redux';
 import axios from 'axios';
-import {SetMainView, SetUserCred, SetMainRole} from './AuthenticateActions'
+import {SetMainView, SetUserCred, SetMainRole, SetClassInfo} from './AuthenticateActions'
 
 @connect((store) => {
   return {
@@ -32,19 +32,19 @@ class App extends React.Component {
             this.props.dispatch(SetMainRole(snapshot.val().primary));
             if (snapshot.val().primary === 'Student'){
               firebase.database().ref(`classes`).once('value').then(function(snapshot){
+                var lastProfile = null;
                 snapshot.forEach(function(classroom){
                   var students = classroom.val().students;
                   for (var id in students){
                     if (students[id].profile.emailAddress === user.email){
-                      var obj = students[id].profile;
-                      firebase.database().ref(`student/${user.uid}/meta`).update(obj);
-
                       var newClass = {};
-                      newClass[students[id].courseId] = true;
+                      newClass[students[id].courseId] = students[id].profile;
                       firebase.database().ref(`student/${user.uid}/classes`).update(newClass);
+                      lastProfile = students[id].profile;
                     }
                   }
                 })
+                firebase.database().ref(`student/${user.uid}/default_profile`).update(lastProfile);
               })
             }
           }

@@ -69,7 +69,7 @@ class AssessmentRecording extends React.Component{
   */
   cleanAudioBlob(blob) {
     // console.log('cleanAudioBlob')
-    const {user_cred} = this.props;
+    const {user_cred, classroomId, assessmentId, assignmentId} = this.props;
     // Note:
     // Use the AudioBLOB for whatever you need, to download
     // directly in the browser, to upload to the server, you name it !
@@ -87,7 +87,10 @@ class AssessmentRecording extends React.Component{
     var socketioStream = ss.createStream();
     ss(socket).emit('client-stream-request', socketioStream, {
       wavFileSize: blob.size,
-      studentName : user_cred.uid
+      studentId : user_cred.uid,
+      classroomId: classroomId,
+      assessmentId: assessmentId,  // T1. T2. Z1. Z2
+      assignmentId: assignmentId //firebase pushed key for location of assessment data
     }, function(confirmation) {
       // console.log(confirmation);
       socket.disconnect(URL_SERVER);
@@ -157,10 +160,18 @@ class AssessmentRecording extends React.Component{
       // Clear the Recorder to start again !
       window.recorder.clear();
     }.bind(this), ("audio/mpeg" || "audio/wav"));
+
+    //recording to firebase database
+    // var obj = {
+    //   assessmentId: 'z1'
+    // }
+    // var studentAssessmentId = firebase.database().ref(`/student/${user_cred.uid}/assessment/`).push(obj);
+
   }
 
   render() {
     const {recording_started, percentComplete, finishedRecording} = this.state;
+    console.log(this.props);
     return (
       <Container>
         <Button.Group labeled icon fluid>
