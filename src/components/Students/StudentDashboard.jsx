@@ -47,6 +47,7 @@ class StudentDashboard extends React.Component {
   }
 
   StartAssessment(course, assessment, assignment) {
+    const {user_cred} = this.props;
     this.setState({
       current_course: course,
       current_assessment: assessment,
@@ -61,6 +62,7 @@ class StudentDashboard extends React.Component {
           current_assessment_image: image,
           open_assessment_modal: true
         })
+        firebase.database().ref(`student/${user_cred.uid}/assignment/${assignment}`).update({status:'initiated'})
       }
     }.bind(this))
   }
