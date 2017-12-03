@@ -36,6 +36,9 @@ class AssessmentRecording extends React.Component{
     */
   startRecording() {
     const {audioContext} = this.state;
+    const {user_cred, assignmentId} = this.props;
+
+    firebase.database().ref(`student/${user_cred.uid}/assignment/${assignmentId}`).update({status:'started'})
     var constraints = {audio:true, video:false};
     // Access the Microphone using the navigator.mediaDevices.getUserMedia method to obtain a stream, HMTL5
     navigator.mediaDevices.getUserMedia(constraints)
@@ -104,6 +107,9 @@ class AssessmentRecording extends React.Component{
 
       this.setState({percentComplete: size / blob.size * 100})
       // console.log(Math.floor(size / AudioBLOB.size * 100) + '%');
+      if (size / blob.size >= 1){
+        firebase.database().ref(`student/${user_cred.uid}/assignment/${assignmentId}`).update({status:'processing'});
+      }
     }.bind(this));
     blobStream.pipe(socketioStream);
     // socket.disconnect(URL_SERVER);
@@ -132,6 +138,10 @@ class AssessmentRecording extends React.Component{
   }
 
   stopRecording(callback, AudioFormat) {
+    const {user_cred, assignmentId} = this.props;
+
+    firebase.database().ref(`student/${user_cred.uid}/assignment/${assignmentId}`).update({status:'uploading'})
+
     // Stop the recorder instance
     window.recorder && window.recorder.stop();
     // console.log('Stopped recording.');
@@ -171,7 +181,6 @@ class AssessmentRecording extends React.Component{
 
   render() {
     const {recording_started, percentComplete, finishedRecording} = this.state;
-    console.log(this.props);
     return (
       <Container>
         <Button.Group labeled icon fluid>
