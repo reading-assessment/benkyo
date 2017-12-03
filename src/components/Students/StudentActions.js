@@ -15,3 +15,12 @@ export function SetCurrentClasses (classes) {
     }
   }
 }
+
+export function SetAllAssigments (assignments) {
+  return {
+    type: 'SET_CURRENT_ASSIGNMENTS',
+    payload: {
+      all_assignments: assignments
+    }
+  }
+}

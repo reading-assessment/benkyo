@@ -26,7 +26,7 @@ firebase.initializeApp(config);
 window.s_mode = {
                   live: false,
                   base_url: 'https://boiling-hollows-85549.herokuapp.com/',
-                  app_server: 'https://165.227.174.222:9005/'
+                  app_server: 'https://sshenableddo.ioakeimidis.eu/benkyo-api-server'
                 }
 
 const app = document.getElementById('app')
