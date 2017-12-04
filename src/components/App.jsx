@@ -1,4 +1,4 @@
-import { Container, Segment, Menu } from 'semantic-ui-react';
+import { Container, Segment, Menu, Dimmer, Loader, Image } from 'semantic-ui-react';
 import { connect } from 'react-redux';
 import axios from 'axios';
 import {SetMainView, SetUserCred, SetMainRole, SetClassInfo} from './AuthenticateActions'
@@ -29,7 +29,11 @@ class App extends React.Component {
       if (user){
         firebase.database().ref(`roles/${user.uid}`).once('value').then(function(snapshot){
           if (snapshot.val()){
-            this.props.dispatch(SetMainRole(snapshot.val().primary));
+            if (snapshot.val().primary) {
+              this.props.dispatch(SetMainRole(snapshot.val().primary));
+            } else {
+              this.props.dispatch(SetMainRole('Select_Role'))
+            }
             if (snapshot.val().primary === 'Student'){
               firebase.database().ref(`classes`).once('value').then(function(snapshot){
                 var lastProfile = null;
@@ -52,8 +56,8 @@ class App extends React.Component {
         this.props.dispatch(SetMainView('Landing Page'));
         this.props.dispatch(SetUserCred(user));
       } else {
-        this.props.dispatch(SetMainView('Login'));
         this.props.dispatch(SetMainRole('Student'));
+        this.props.dispatch(SetMainView('Login'));
       }
     }.bind(this));
   }
@@ -82,11 +86,29 @@ class App extends React.Component {
             <StudentDashboard/>
           </div>
         )
-      } else {
+      } else if (role === 'Select_Role') {
         var renderLogin = (
           <VerifyRole/>
         )
+      } else {
+        var renderLogin = (
+          <Segment>
+            <Dimmer active>
+              <Loader />
+            </Dimmer>
+            <Image src='https://firebasestorage.googleapis.com/v0/b/benkyohr-e00dc.appspot.com/o/elements%2Fshort-paragraph.png?alt=media&token=3b02b482-c6b7-42a6-ad03-c66c0a8f94b3' />
+          </Segment>
+        )
       }
+    } else if (change_main_view === 'Authenticating'){
+      var renderLogin = (
+        <Segment>
+          <Dimmer active>
+            <Loader />
+          </Dimmer>
+          <Image src='https://firebasestorage.googleapis.com/v0/b/benkyohr-e00dc.appspot.com/o/elements%2Fshort-paragraph.png?alt=media&token=3b02b482-c6b7-42a6-ad03-c66c0a8f94b3' />
+        </Segment>
+      )
     }
 
     return (

@@ -3,6 +3,7 @@ import { connect } from 'react-redux';
 import htmlToText from 'html-to-text';
 import axios from 'axios';
 import {SetCurrentProfile, SetCurrentClasses, SetAllAssigments} from './StudentActions'
+import Promise from 'bluebird';
 
 class StudentDashboard extends React.Component {
   constructor(props){
@@ -21,28 +22,42 @@ class StudentDashboard extends React.Component {
 
   componentDidMount(){
     const{user_cred} = this.props;
-    firebase.database().ref(`student/${user_cred.uid}`).once('value').then(function(snapshot){
-      if (snapshot.val()){
-        this.props.dispatch(SetCurrentProfile(snapshot.val().default_profile));
-        this.props.dispatch(SetCurrentClasses(snapshot.val().classes));
-        var classes = snapshot.val().classes;
-        var ids = [];
-        for (var single_class in classes) {
-          ids.push(classes[single_class].id);
+
+    return new Promise(function(resolve, reject){
+      firebase.database().ref(`/student/${user_cred.uid}/assignment/`).once('value')
+      .then(function(snapshot){
+        snapshot.forEach(function(assignment){
+          if (assignment.val().status === 'done') {
+            firebase.database().ref(`assignment/${assignment.key}/results`).update(assignment.val());
+            resolve();
+          }
+        })
+      })
+    })
+    .then(function(){
+      firebase.database().ref(`student/${user_cred.uid}`).once('value').then(function(snapshot){
+        if (snapshot.val()){
+          this.props.dispatch(SetCurrentProfile(snapshot.val().default_profile));
+          this.props.dispatch(SetCurrentClasses(snapshot.val().classes));
+          var classes = snapshot.val().classes;
+          var ids = [];
+          for (var single_class in classes) {
+            ids.push(classes[single_class].id);
+          }
+          firebase.database().ref(`assignment`).once('value')
+          .then(function(assignment_snap){
+            var all_assignments = [];
+            assignment_snap.forEach(function(each_assignment){
+              if(ids.indexOf(each_assignment.val().studentID)>-1){
+                var obj = each_assignment.val();
+                obj.assignmentID = each_assignment.key;
+                all_assignments.push(obj);
+              }
+            })
+            this.props.dispatch(SetAllAssigments(all_assignments));
+          }.bind(this))
         }
-        firebase.database().ref(`assignment`).once('value')
-        .then(function(assignment_snap){
-          var all_assignments = [];
-          assignment_snap.forEach(function(each_assignment){
-            if(ids.indexOf(each_assignment.val().studentID)>-1){
-              var obj = each_assignment.val();
-              obj.assignmentID = each_assignment.key;
-              all_assignments.push(obj);
-            }
-          })
-          this.props.dispatch(SetAllAssigments(all_assignments));
-        }.bind(this))
-      }
+      }.bind(this));
     }.bind(this))
   }
 
@@ -112,12 +127,23 @@ class StudentDashboard extends React.Component {
 
           <Table.Body>
             {all_assignments.map(function(assignment, key){
+              if (!assignment.results){
+                var renderCTA = (
+                  <a href='#' onClick={()=>{this.StartAssessment(assignment.courseID, assignment.assessment, assignment.assignmentID)}}>Begin</a>
+                )
+              } else {
+                var renderCTA = (
+                  <div>
+                    {assignment.results.scoreFromCompareWord}
+                  </div>
+                )
+              }
               return(
                 <Table.Row key={key}>
                   <Table.Cell>{assignment.courseID}</Table.Cell>
                   <Table.Cell>{assignment.assessment}</Table.Cell>
                   <Table.Cell selectable>
-                    <a href='#' onClick={()=>{this.StartAssessment(assignment.courseID, assignment.assessment, assignment.assignmentID)}}>Begin</a>
+                    {renderCTA}
                   </Table.Cell>
                 </Table.Row>
               )
