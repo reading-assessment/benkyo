@@ -1,7 +1,7 @@
 export default function reducer( state = {
   role: null,
   user_cred: {},
-  change_main_view: 'Landing_Page'
+  change_main_view: 'Authenticating'
   }, action ) {
 
   switch (action.type) {

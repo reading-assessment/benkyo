@@ -1,10 +1,11 @@
 export default function reducer( state = {
     currentClassroom: {},
     classrooms: [],
+    live_assignments: [],
     current_target_student: null,
     all_assessments: null,
     selected_assessment: null,
-    done_selecting:false
+    done_selecting: false,
   }, action ) {
   switch (action.type) {
     case 'SET_ALL_CLASSROOMS': {
@@ -15,6 +16,11 @@ export default function reducer( state = {
     case 'SET_CURRENT_CLASSROOM': {
       return {...state,
         currentClassroom: action.payload.currentClassroom
+      }
+    }
+    case 'SET_ALL_LIVE_ASSIGNMENTS': {
+      return {...state,
+        live_assignments: action.payload.live_assignments
       }
     }
     case 'SET_TARGET_STUDENT': {

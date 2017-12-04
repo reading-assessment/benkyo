@@ -39,6 +39,7 @@ class AssessmentRecording extends React.Component{
     const {user_cred, assignmentId} = this.props;
 
     firebase.database().ref(`student/${user_cred.uid}/assignment/${assignmentId}`).update({status:'started'})
+    firebase.database().ref(`assignment/${assignmentId}/results`).update({status:'started'})
     var constraints = {audio:true, video:false};
     // Access the Microphone using the navigator.mediaDevices.getUserMedia method to obtain a stream, HMTL5
     navigator.mediaDevices.getUserMedia(constraints)
@@ -109,6 +110,7 @@ class AssessmentRecording extends React.Component{
       // console.log(Math.floor(size / AudioBLOB.size * 100) + '%');
       if (size / blob.size >= 1){
         firebase.database().ref(`student/${user_cred.uid}/assignment/${assignmentId}`).update({status:'processing'});
+        firebase.database().ref(`assignment/${assignmentId}/results`).update({status:'processing'});
       }
     }.bind(this));
     blobStream.pipe(socketioStream);
@@ -141,6 +143,7 @@ class AssessmentRecording extends React.Component{
     const {user_cred, assignmentId} = this.props;
 
     firebase.database().ref(`student/${user_cred.uid}/assignment/${assignmentId}`).update({status:'uploading'})
+    firebase.database().ref(`assignment/${assignmentId}/results`).update({status:'uploading'})
 
     // Stop the recorder instance
     window.recorder && window.recorder.stop();

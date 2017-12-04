@@ -16,6 +16,15 @@ export function SetAllClassrooms (classrooms) {
   }
 }
 
+export function SetAllLiveAssignments (live_assignments) {
+  return {
+    type: 'SET_ALL_LIVE_ASSIGNMENTS',
+    payload: {
+      live_assignments: live_assignments
+    }
+  }
+}
+
 export function SetTargetStudent (student) {
   return {
     type: 'SET_TARGET_STUDENT',
