@@ -1,4 +1,4 @@
-import { Container, Segment, Header, Table, Modal, Image, Item, Divider } from 'semantic-ui-react';
+import { Container, Segment, Header, Table, Modal, Image, Item, Divider, Button } from 'semantic-ui-react';
 import { connect } from 'react-redux';
 import htmlToText from 'html-to-text';
 import axios from 'axios';
@@ -78,6 +78,7 @@ class StudentDashboard extends React.Component {
           open_assessment_modal: true
         })
         firebase.database().ref(`student/${user_cred.uid}/assignment/${assignment}`).update({status:'initiated'})
+        firebase.database().ref(`assignment/${assignment}/results`).update({status:'initiated'})
       }
     }.bind(this))
   }
@@ -116,12 +117,13 @@ class StudentDashboard extends React.Component {
           Good Luck!
         </Header>
 
-        <Table celled>
+        <Table singleLine>
           <Table.Header>
             <Table.Row>
               <Table.HeaderCell>Course</Table.HeaderCell>
               <Table.HeaderCell>Assessment</Table.HeaderCell>
               <Table.HeaderCell>Status</Table.HeaderCell>
+              <Table.HeaderCell>Score</Table.HeaderCell>
             </Table.Row>
           </Table.Header>
 
@@ -129,21 +131,35 @@ class StudentDashboard extends React.Component {
             {all_assignments.map(function(assignment, key){
               if (!assignment.results){
                 var renderCTA = (
-                  <a href='#' onClick={()=>{this.StartAssessment(assignment.courseID, assignment.assessment, assignment.assignmentID)}}>Begin</a>
+                  <Table.Cell textAlign='center'>
+                    <Button color='green' fluid size='mini' onClick={()=>{this.StartAssessment(assignment.courseID, assignment.assessment, assignment.assignmentID)}}>Begin</Button>
+                  </Table.Cell>
                 )
               } else {
-                var renderCTA = (
-                  <div>
-                    {assignment.results.scoreFromCompareWord}
-                  </div>
-                )
+                if (assignment.results.status !== 'done'){
+                  var renderCTA = (
+                    <Table.Cell textAlign='center'>
+                      <Button color='green' fluid size='mini' onClick={()=>{this.StartAssessment(assignment.courseID, assignment.assessment, assignment.assignmentID)}}>Begin</Button>
+                    </Table.Cell>
+                  )
+                } else {
+                  var renderCTA = (
+                    <Table.Cell>
+                      {assignment.results.status}
+                    </Table.Cell>
+                  )
+                }
+                if (assignment.results.scoreFromCompareWord){
+                  var renderScore = new Number(assignment.results.scoreFromCompareWord*100).toFixed(0).toString() + '%';
+                }
               }
               return(
                 <Table.Row key={key}>
                   <Table.Cell>{assignment.courseID}</Table.Cell>
                   <Table.Cell>{assignment.assessment}</Table.Cell>
-                  <Table.Cell selectable>
-                    {renderCTA}
+                  {renderCTA}
+                  <Table.Cell>
+                    {renderScore}
                   </Table.Cell>
                 </Table.Row>
               )
