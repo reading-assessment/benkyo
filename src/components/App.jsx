@@ -3,13 +3,13 @@ import { connect } from 'react-redux';
 import axios from 'axios';
 import {SetMainView, SetUserCred, SetMainRole, SetClassInfo} from './AuthenticateActions'
 
-@connect((store) => {
+/* @connect((store) => {
   return {
     user_cred: store.authentication.user_cred,
     change_main_view: store.authentication.change_main_view,
     role: store.authentication.role
   }
-})
+}) */
 
 class App extends React.Component {
   constructor (props) {
@@ -122,4 +122,13 @@ class App extends React.Component {
   }
 }
 
-window.App = App;
+
+window.App = connect((store) => {
+  return {
+    user_cred: store.authentication.user_cred,
+    change_main_view: store.authentication.change_main_view,
+    role: store.authentication.role
+  }
+})(App);
+
+// window.App = App;

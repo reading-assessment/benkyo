@@ -1,7 +1,7 @@
 import { Header, Button, Icon, Segment, Grid, Message } from 'semantic-ui-react';
 import { connect } from 'react-redux';
 import { SetMainView, SetMainRole } from '../AuthenticateActions'
-
+/* 
 @connect((store) => {
   return {
     user_cred: store.authentication.user_cred,
@@ -9,7 +9,7 @@ import { SetMainView, SetMainRole } from '../AuthenticateActions'
     role: store.authentication.role
   }
 })
-
+ */
 class VerifyRole extends React.Component {
   constructor(props){
     super(props);
@@ -48,4 +48,15 @@ class VerifyRole extends React.Component {
   }
 }
 
-window.VerifyRole = VerifyRole;
+window.VerifyRole = connect((store) => {
+  return {
+    user_cred: store.authentication.user_cred,
+    change_main_view: store.authentication.change_main_view,
+    role: store.authentication.role
+  }
+})(VerifyRole);
+
+
+// window.VerifyRole = VerifyRole;
+
+

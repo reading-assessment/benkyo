@@ -4,7 +4,7 @@ import axios from 'axios';
 import { SetAllClassrooms, SetCurrentClassrooms, SetTargetStudent, ResetSelectAssessment } from './TeacherActions'
 import Promise from 'bluebird'
 
-@connect((store) => {
+/* @connect((store) => {
   return {
     user_cred: store.authentication.user_cred,
     change_main_view: store.authentication.change_main_view,
@@ -13,7 +13,7 @@ import Promise from 'bluebird'
     currentClassroom: store.teacher.currentClassroom,
   }
 })
-
+ */
 class ClassroomByGoogle extends React.Component {
   constructor(props){
     super(props);
@@ -62,4 +62,17 @@ class ClassroomByGoogle extends React.Component {
   }
 }
 
-window.ClassroomByGoogle = ClassroomByGoogle
+
+window.ClassroomByGoogle = connect((store) => {
+  return {
+    user_cred: store.authentication.user_cred,
+    change_main_view: store.authentication.change_main_view,
+    role: store.authentication.role,
+    classrooms: store.teacher.classrooms,
+    currentClassroom: store.teacher.currentClassroom
+  }
+})(ClassroomByGoogle);
+
+
+// window.ClassroomByGoogle = ClassroomByGoogle
+

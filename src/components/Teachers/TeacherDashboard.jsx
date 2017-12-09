@@ -4,7 +4,7 @@ import axios from 'axios';
 import { SetAllClassrooms, SetCurrentClassrooms, StoreAllAssessments, SetAllLiveAssignments } from './TeacherActions'
 import Promise from 'bluebird';
 import _ from 'lodash';
-
+/* 
 @connect((store) => {
   return {
     user_cred: store.authentication.user_cred,
@@ -21,7 +21,7 @@ import _ from 'lodash';
     ]
   }
 })
-
+ */
 
 class TeacherDashboard extends React.Component {
   constructor(props){
@@ -145,4 +145,23 @@ class TeacherDashboard extends React.Component {
   }
 }
 
-window.TeacherDashboard = TeacherDashboard;
+
+window.TeacherDashboard = connect((store) => {
+  return {
+    user_cred: store.authentication.user_cred,
+    dummyData: [
+      { studentName: 'Juan', rawScore: 54, studentReading: 'this is a reading', AssignedAssessment: 'Assessment P, Version 3' },
+      { studentName: 'Juan', rawScore: 54, studentReading: 'this is a reading', AssignedAssessment: 'Assessment P, Version 3' },
+      { studentName: 'Juan', rawScore: 54, studentReading: 'this is a reading', AssignedAssessment: 'Assessment P, Version 3' },
+      { studentName: 'Juan', rawScore: 54, studentReading: 'this is a reading', AssignedAssessment: 'Assessment P, Version 3' },
+      { studentName: 'Juan', rawScore: 54, studentReading: 'this is a reading', AssignedAssessment: 'Assessment P, Version 3' },
+      { studentName: 'Juan', rawScore: 54, studentReading: 'this is a reading', AssignedAssessment: 'Assessment P, Version 3' },
+      { studentName: 'Juan', rawScore: 54, studentReading: 'this is a reading', AssignedAssessment: 'Assessment P, Version 3' },
+      { studentName: 'Juan', rawScore: 54, studentReading: 'this is a reading', AssignedAssessment: 'Assessment P, Version 3' }
+    ]
+  }
+})(TeacherDashboard);
+
+
+
+//window.TeacherDashboard = TeacherDashboard;
