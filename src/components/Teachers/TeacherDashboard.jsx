@@ -8,17 +8,7 @@ import _ from 'lodash';
 @connect((store) => {
   return {
     user_cred: store.authentication.user_cred,
-    live_assignments: store.teacher.live_assignments,
-    dummyData: [
-      { studentName: 'Juan', rawScore: 54, studentReading: 'this is a reading', AssignedAssessment: 'Assessment P, Version 3'},
-      { studentName: 'Juan', rawScore: 54, studentReading: 'this is a reading', AssignedAssessment: 'Assessment P, Version 3'},
-      { studentName: 'Juan', rawScore: 54, studentReading: 'this is a reading', AssignedAssessment: 'Assessment P, Version 3'},
-      { studentName: 'Juan', rawScore: 54, studentReading: 'this is a reading', AssignedAssessment: 'Assessment P, Version 3'},
-      { studentName: 'Juan', rawScore: 54, studentReading: 'this is a reading', AssignedAssessment: 'Assessment P, Version 3'},
-      { studentName: 'Juan', rawScore: 54, studentReading: 'this is a reading', AssignedAssessment: 'Assessment P, Version 3'},
-      { studentName: 'Juan', rawScore: 54, studentReading: 'this is a reading', AssignedAssessment: 'Assessment P, Version 3'},
-      { studentName: 'Juan', rawScore: 54, studentReading: 'this is a reading', AssignedAssessment: 'Assessment P, Version 3'}
-    ]
+    live_assignments: store.teacher.live_assignments
   }
 })
  */
@@ -70,7 +60,7 @@ class TeacherDashboard extends React.Component {
               name: assignment.val().studentInfo.name.fullName,
               assessment: assignment.val().assessment,
               status: (results)?results.status:'Have not started',
-              score: (score)?(<span>{new Number(score*100).toFixed(0).toString() + '%'}</span>):null,
+              score: (score !== undefined && score !== null)?(<span>{new Number(score*100).toFixed(0).toString() + '%'}</span>):null,
               flac: (flacFile)?(<audio controls preload='auto'><source src={flacFile} type="audio/flac"/></audio>):null
             }
             allLiveAssignments.push(obj);
