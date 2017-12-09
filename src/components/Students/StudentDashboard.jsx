@@ -29,9 +29,9 @@ class StudentDashboard extends React.Component {
         snapshot.forEach(function(assignment){
           if (assignment.val().status === 'done') {
             firebase.database().ref(`assignment/${assignment.key}/results`).update(assignment.val());
-            resolve();
           }
         })
+        resolve();
       })
     })
     .then(function(){
