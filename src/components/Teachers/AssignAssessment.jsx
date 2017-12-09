@@ -3,7 +3,7 @@ import { connect } from 'react-redux';
 import axios from 'axios';
 import htmlToText from 'html-to-text';
 import {SelectAssessment, AssignItinStone} from './TeacherActions'
-
+/* 
 @connect((store) => {
   return {
     user_cred: store.authentication.user_cred,
@@ -13,7 +13,7 @@ import {SelectAssessment, AssignItinStone} from './TeacherActions'
     done_selecting: store.teacher.done_selecting
   }
 })
-
+ */
 class AssignAssessment extends React.Component{
   constructor(props) {
     super(props);
@@ -121,4 +121,16 @@ class AssignAssessment extends React.Component{
   }
 }
 
-window.AssignAssessment = AssignAssessment;
+window.AssignAssessment = connect((store) => {
+  return {
+    user_cred: store.authentication.user_cred,
+    current_target_student: store.teacher.current_target_student,
+    all_assessments: store.teacher.all_assessments,
+    selected_assessment: store.teacher.selected_assessment,
+    done_selecting: store.teacher.done_selecting
+  }
+})(AssignAssessment);
+
+
+
+//window.AssignAssessment = AssignAssessment;

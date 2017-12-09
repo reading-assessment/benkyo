@@ -4,12 +4,12 @@ import { connect } from 'react-redux';
 import { SetAuthenticatedUID } from './TeacherLoginActions'
 import { SetMainRole } from '../../AuthenticateActions'
 
-@connect((store) => {
+/* @connect((store) => {
   return {
     uid: store.authentication.uid
   }
 })
-
+ */
 class TeacherLogin extends React.Component {
   constructor(props){
     super(props);
@@ -71,4 +71,12 @@ class TeacherLogin extends React.Component {
   }
 };
 
-window.TeacherLogin = TeacherLogin;
+
+window.TeacherLogin = connect((store) => {
+  return {
+    uid: store.authentication.uid
+  }
+})(TeacherLogin);
+
+
+//window.TeacherLogin = TeacherLogin;

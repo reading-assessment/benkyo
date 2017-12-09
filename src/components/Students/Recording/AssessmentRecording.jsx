@@ -4,14 +4,14 @@ import { connect } from 'react-redux';
 import Recorder from 'recorderjs';
 import io from 'socket.io-client';
 import ss from 'socket.io-stream';
-
+/* 
 @connect((store) => {
   return {
     user_cred: store.authentication.user_cred,
     role: store.authentication.role
   }
 })
-
+ */
 class AssessmentRecording extends React.Component{
   constructor (props) {
     super(props);
@@ -199,4 +199,14 @@ class AssessmentRecording extends React.Component{
   }
 }
 
-window.AssessmentRecording = AssessmentRecording;
+
+window.AssessmentRecording = connect((store) => {
+  return {
+    user_cred: store.authentication.user_cred,
+    role: store.authentication.role
+  }
+})(AssessmentRecording);
+
+
+
+// window.AssessmentRecording = AssessmentRecording;
