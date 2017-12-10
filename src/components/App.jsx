@@ -1,17 +1,14 @@
+import React from 'react';
 import { Container, Segment, Menu, Dimmer, Loader, Image } from 'semantic-ui-react';
 import { connect } from 'react-redux';
 import axios from 'axios';
 import {SetMainView, SetUserCred, SetMainRole, SetClassInfo} from './AuthenticateActions'
 
-/* @connect((store) => {
-  return {
-    user_cred: store.authentication.user_cred,
-    change_main_view: store.authentication.change_main_view,
-    role: store.authentication.role
-  }
-}) */
+/******* For Testing Purpose, uncomment only for jest test.  comment for running application *******/
+// import {NavigationHeader} from './NavigationHeader.jsx'
+/***********************************/
 
-class App extends React.Component {
+export default class App extends React.Component {
   constructor (props) {
     super(props);
     this.state = {

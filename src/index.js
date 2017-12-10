@@ -33,8 +33,6 @@ const app = document.getElementById('app')
 
 ReactDOM.render(
     <Provider store={store}>
-      <Router>
-  	   <Route path="/" component={App} />
-      </Router>
+      <App/>
     </Provider>
 , app);
