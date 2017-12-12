@@ -48,6 +48,7 @@ class StudentLogin extends React.Component {
   }
 
   render(){
+    // what is this line doing?
     const{ uid } = this.props;
     return (
       <div style={{ paddingTop: '5em' }}>

@@ -32,7 +32,7 @@ export default class NavigationHeader extends React.Component {
 
   render(){
     const {user_cred, role} = this.props;
-
+    // if there is a uid (user logged in?)
     if (user_cred.uid){
       if (role === 'Teacher') {
         var renderImportClassRoom = (
