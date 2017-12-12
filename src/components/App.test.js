@@ -11,10 +11,8 @@ configure({ adapter: new Adapter(), disableLifecycleMethods: true });
 
 
 describe('App', () => {
-  console.log('working');
   const app = shallow(<App />);
   it('renders properly', () => {
     expect(app).toMatchSnapshot();
-    expect('hello').toBe('hello');
   });
 });

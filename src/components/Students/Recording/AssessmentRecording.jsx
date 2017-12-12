@@ -4,7 +4,8 @@ import { connect } from 'react-redux';
 import Recorder from 'recorderjs';
 import io from 'socket.io-client';
 import ss from 'socket.io-stream';
-/* 
+import Promise from 'bluebird'
+/*
 @connect((store) => {
   return {
     user_cred: store.authentication.user_cred,
@@ -90,7 +91,7 @@ class AssessmentRecording extends React.Component{
     // ss is socketio-stream globally available variable from imported file
     var socketioStream = ss.createStream();
     ss(socket).emit('client-stream-request', socketioStream, {
-      wavFileSize: blob.size,
+      // wavFileSize: blob.size,
       studentId : user_cred.uid,
       classroomId: classroomId,
       assessmentId: assessmentId,  // T1. T2. Z1. Z2
@@ -100,20 +101,21 @@ class AssessmentRecording extends React.Component{
       socket.disconnect(URL_SERVER);
       this.setState({finishedRecording: true});
     }.bind(this));
-    var blobStream = ss.createBlobReadStream(blob);
-    var size = 0;
+    // var blobStream = ss.createBlobReadStream(blob);
+    // var size = 0;
 
-    blobStream.on('data', function(chunk){
-      size += chunk.length;
+    // blobStream.on('data', function(chunk){
+    //   size += chunk.length;
 
-      this.setState({percentComplete: size / blob.size * 100})
-      // console.log(Math.floor(size / AudioBLOB.size * 100) + '%');
-      if (size / blob.size >= 1){
-        firebase.database().ref(`student/${user_cred.uid}/assignment/${assignmentId}`).update({status:'processing'});
-        firebase.database().ref(`assignment/${assignmentId}/results`).update({status:'processing'});
-      }
-    }.bind(this));
-    blobStream.pipe(socketioStream);
+    //   this.setState({percentComplete: size / blob.size * 100})
+    //   // console.log(Math.floor(size / AudioBLOB.size * 100) + '%');
+    //   if (size / blob.size >= 1){
+    //     firebase.database().ref(`student/${user_cred.uid}/assignment/${assignmentId}`).update({status:'processing'});
+    //     firebase.database().ref(`assignment/${assignmentId}/results`).update({status:'processing'});
+    //   }
+    // }.bind(this));
+    // blobStream.pipe(socketioStream);
+
     // socket.disconnect(URL_SERVER);
     // code before the progress bar
     // ss.createBlobReadStream(AudioBLOB).pipe(socketioStream);
@@ -140,7 +142,7 @@ class AssessmentRecording extends React.Component{
   }
 
   stopRecording(callback, AudioFormat) {
-    const {user_cred, assignmentId} = this.props;
+    const {user_cred, classroomId, assessmentId, assignmentId} = this.props;
 
     firebase.database().ref(`student/${user_cred.uid}/assignment/${assignmentId}`).update({status:'uploading'})
     firebase.database().ref(`assignment/${assignmentId}/results`).update({status:'uploading'})
@@ -165,7 +167,39 @@ class AssessmentRecording extends React.Component{
     */
     // Custom library
     window.recorder && window.recorder.exportWAV(function (blob) {
-      this.cleanAudioBlob(blob);
+      var audioRef = firebase.storage().ref().child(`audio/${user_cred.uid}/${classroomId}/${assignmentId}`);
+      audioRef.put(blob).then(function(snapshot){
+        firebase.database().ref(`student/${user_cred.uid}/assignment/${assignmentId}`).update({status:'processing'});
+        firebase.database().ref(`assignment/${assignmentId}/results`).update({status:'processing'});
+        console.log('Uploaded a blob');
+        this.cleanAudioBlob(blob);
+      })
+      // console.log(blob);
+      // new Promise(function(resolve, reject) {
+      //   Notification.requestPermission(function(result) {
+      //     if (result !== 'granted') return reject(Error("Denied notification permission"));
+      //     resolve();
+      //   })
+      // }).then(function() {
+      //   return navigator.serviceWorker;
+      // }).then(function(reg) {
+      //   var options = {
+      //     blob: blob,
+      //     uid: user_cred.uid,
+      //     classroomId: classroomId,
+      //     assessmentId: assessmentId,
+      //     assignmentId: assignmentId
+      //   }
+      //   reg.controller.postMessage({type: 'upload', options});
+      //   return navigator.serviceWorker.ready;
+      // }).then(function(reg) {
+      //   return reg.sync.register("Let's Upload!");
+      // }).catch(function(err) {
+      //   console.log('It broke');
+      //   console.log(err.message);
+      // });
+
+
 
       // create WAV download link using audio data blob
       // createDownloadLink();
@@ -173,13 +207,6 @@ class AssessmentRecording extends React.Component{
       // Clear the Recorder to start again !
       window.recorder.clear();
     }.bind(this), ("audio/mpeg" || "audio/wav"));
-
-    //recording to firebase database
-    // var obj = {
-    //   assessmentId: 'z1'
-    // }
-    // var studentAssessmentId = firebase.database().ref(`/student/${user_cred.uid}/assessment/`).push(obj);
-
   }
 
   render() {

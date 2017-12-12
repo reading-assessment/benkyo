@@ -26,7 +26,9 @@ class ClassroomByGoogle extends React.Component {
     if (currentClassroom.students) {
       var studentArray = [];
       for (var student in currentClassroom.students) {
-        studentArray.push(currentClassroom.students[student]);
+        var obj = currentClassroom.students[student];
+        obj['descriptionHeading'] = currentClassroom.descriptionHeading;
+        studentArray.push(obj);
       }
 
       var renderStudents = (
