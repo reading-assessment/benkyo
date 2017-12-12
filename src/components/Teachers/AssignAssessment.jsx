@@ -3,7 +3,7 @@ import { connect } from 'react-redux';
 import axios from 'axios';
 import htmlToText from 'html-to-text';
 import {SelectAssessment, AssignItinStone} from './TeacherActions'
-/* 
+/*
 @connect((store) => {
   return {
     user_cred: store.authentication.user_cred,
@@ -33,7 +33,8 @@ class AssignAssessment extends React.Component{
       studentID: current_target_student.userId,
       studentInfo: current_target_student.profile,
       courseID: current_target_student.courseId,
-      assessment: '-' + selected_assessment
+      assessment: '-' + selected_assessment,
+      descriptionHeading: current_target_student.descriptionHeading //Name of the Class
     };
     firebase.database().ref(`assignment`).push(obj);
     this.props.dispatch(AssignItinStone());

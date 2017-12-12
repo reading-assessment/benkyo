@@ -10,7 +10,7 @@ import store from './store'
     authDomain: "benkyohr-e00dc.firebaseapp.com",
     databaseURL: "https://benkyohr-e00dc.firebaseio.com",
     projectId: "benkyohr-e00dc",
-    storageBucket: "",
+    storageBucket: "gs://benkyohr-e00dc.appspot.com",
     messagingSenderId: "385974337950"
   };
 firebase.initializeApp(config);

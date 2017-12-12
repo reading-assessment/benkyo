@@ -120,7 +120,7 @@ class StudentDashboard extends React.Component {
         <Table singleLine>
           <Table.Header>
             <Table.Row>
-              <Table.HeaderCell>Course</Table.HeaderCell>
+              <Table.HeaderCell>Assignment</Table.HeaderCell>
               <Table.HeaderCell>Assessment</Table.HeaderCell>
               <Table.HeaderCell>Status</Table.HeaderCell>
               <Table.HeaderCell>Score</Table.HeaderCell>
@@ -155,7 +155,11 @@ class StudentDashboard extends React.Component {
               }
               return(
                 <Table.Row key={key}>
-                  <Table.Cell>{assignment.courseID}</Table.Cell>
+                  <Table.Cell>
+                  <strong>{(assignment.descriptionHeading)?assignment.descriptionHeading:assignment.courseID}</strong>
+                  <br/>
+                  Assignment Id: {assignment.assignmentID}
+                  </Table.Cell>
                   <Table.Cell>{assignment.assessment}</Table.Cell>
                   {renderCTA}
                   <Table.Cell>
