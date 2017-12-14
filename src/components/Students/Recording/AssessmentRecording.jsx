@@ -192,7 +192,7 @@ class AssessmentRecording extends React.Component{
         var fileNameWAV = filePrefix + '.wav';
         var downloadURL = uploadTask.snapshot.downloadURL;
         this.cleanAudioBlob(blob, downloadURL, filePrefix);
-        
+
         console.log('Uploaded a blob', downloadURL);
       }.bind(this));
       // ----------MAX working code------------
