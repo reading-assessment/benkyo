@@ -72,35 +72,41 @@ class AssessmentRecording extends React.Component{
   * receives the same Blob as first argument. The second argument is
   * optional and specifies the format to export the blob either wav or mp3
   */
-  cleanAudioBlob(blob) {
+  cleanAudioBlob(blob, downloadURL, filePrefix) {
     // console.log('cleanAudioBlob')
     const {user_cred, classroomId, assessmentId, assignmentId} = this.props;
-    // Note:
-    // Use the AudioBLOB for whatever you need, to download
-    // directly in the browser, to upload to the server, you name it !
-    // AudioBLOB variable contains the actual wav file
-
-    // In this case we are going to add an Audio item to the list so you
-    // can play every stored Audio
 
     // ----------------JOHN CODE----------------------------
     // Sockets.io and socketio-stream code
     var URL_SERVER = window.s_mode.app_server;
     // io is a globally available variable from socketio cdn that is imported
     var socket = io.connect(URL_SERVER);
+    socket.emit('bucket-stored', {
+      user_cred,
+      classroomId,
+      assessmentId,
+      assignmentId,
+      downloadURL,
+      filePrefix
+    }, (confirmation)=>{
+      if (confirmation) {
+        socket.disconnect();
+      }
+    });
+    // ------OLD CODE when we sent the file to DO instead of google bucket---------
     // ss is socketio-stream globally available variable from imported file
-    var socketioStream = ss.createStream();
-    ss(socket).emit('client-stream-request', socketioStream, {
-      // wavFileSize: blob.size,
-      studentId : user_cred.uid,
-      classroomId: classroomId,
-      assessmentId: assessmentId,  // T1. T2. Z1. Z2
-      assignmentId: assignmentId //firebase pushed key for location of assessment data
-    }, function(confirmation) {
-      // console.log(confirmation);
-      socket.disconnect(URL_SERVER);
-      this.setState({finishedRecording: true});
-    }.bind(this));
+    // var socketioStream = ss.createStream();
+    // ss(socket).emit('client-stream-request', socketioStream, {
+    //   // wavFileSize: blob.size,
+    //   studentId : user_cred.uid,
+    //   classroomId: classroomId,
+    //   assessmentId: assessmentId,  // T1. T2. Z1. Z2
+    //   assignmentId: assignmentId //firebase pushed key for location of assessment data
+    // }, function(confirmation) {
+    //   // console.log(confirmation);
+    //   socket.disconnect(URL_SERVER);
+    //   // this.setState({finishedRecording: true});
+    // }.bind(this));
     // var blobStream = ss.createBlobReadStream(blob);
     // var size = 0;
 
@@ -119,7 +125,7 @@ class AssessmentRecording extends React.Component{
     // socket.disconnect(URL_SERVER);
     // code before the progress bar
     // ss.createBlobReadStream(AudioBLOB).pipe(socketioStream);
-    // -----------------------------------------------------
+    // ---------------------END OLD CODE--------------------------------
 
     //------Append wav file to li item and make it available in HTML5 audio player
     var url = URL.createObjectURL(blob);
@@ -167,13 +173,36 @@ class AssessmentRecording extends React.Component{
     */
     // Custom library
     window.recorder && window.recorder.exportWAV(function (blob) {
-      var audioRef = firebase.storage().ref().child(`audio/${user_cred.uid}/${classroomId}/${assignmentId}`);
-      audioRef.put(blob).then(function(snapshot){
-        firebase.database().ref(`student/${user_cred.uid}/assignment/${assignmentId}`).update({status:'processing'});
-        firebase.database().ref(`assignment/${assignmentId}/results`).update({status:'processing'});
-        console.log('Uploaded a blob');
-        this.cleanAudioBlob(blob);
-      })
+      var d = new Date();
+      var timestamp = d.getTime().toString();
+      var fileName = user_cred.uid + 'TTTT' + timestamp + '.wav';
+      console.log(timestamp);
+      var audioRef = firebase.storage().ref().child(`audio/${fileName}`);
+      var uploadTask = audioRef.put(blob);
+      uploadTask.on('state_changed', function(snapshot){
+        var progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+        console.log('Upload is ' + progress + '% done');
+        this.setState({percentComplete: progress});
+      }.bind(this), function (error){
+
+      }, function(){
+        var d = new Date();
+        var timestamp = d.getTime().toString();
+        var filePrefix = user_cred.uid + 'TTTT' + timestamp;
+        var fileNameWAV = filePrefix + '.wav';
+        var downloadURL = uploadTask.snapshot.downloadURL;
+        this.cleanAudioBlob(blob, downloadURL, filePrefix);
+        
+        console.log('Uploaded a blob', downloadURL);
+      }.bind(this));
+      // ----------MAX working code------------
+      // audioRef.put(blob).then(function(snapshot){
+      //   firebase.database().ref(`student/${user_cred.uid}/assignment/${assignmentId}`).update({status:'processing'});
+      //   firebase.database().ref(`assignment/${assignmentId}/results`).update({status:'processing'});
+      //   console.log('Uploaded a blob');
+      //   this.cleanAudioBlob(blob);
+      // }.bind(this));
+      //----------END OF MAX WORKING CODE, BEGIN MAX COMMENTS-------------
       // console.log(blob);
       // new Promise(function(resolve, reject) {
       //   Notification.requestPermission(function(result) {
