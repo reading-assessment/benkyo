@@ -1,3 +1,4 @@
+import React from 'react';
 import { Table, Checkbox, Button, Icon, Segment, Grid } from 'semantic-ui-react';
 import { connect } from 'react-redux';
 import axios from 'axios';

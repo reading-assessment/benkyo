@@ -1,3 +1,4 @@
+import React from 'react';
 import { Segment, Header, Card, Dropdown, Button, Image, Item } from 'semantic-ui-react';
 import { connect } from 'react-redux';
 import axios from 'axios';
