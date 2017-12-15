@@ -4,12 +4,11 @@ import { connect } from 'react-redux';
 import { SetAuthenticatedUID } from './StudentLoginActions'
 import { SetMainRole } from '../../AuthenticateActions'
 
-/* @connect((store) => {
+export default connect((store) => {
   return {
     uid: store.authentication.uid
   }
-}) */
-
+})(
 class StudentLogin extends React.Component {
   constructor(props){
     super(props);
@@ -70,15 +69,4 @@ class StudentLogin extends React.Component {
       </div>
     )
   }
-};
-
-
-window.StudentLogin = connect((store) => {
-  return {
-    uid: store.authentication.uid
-  }
-})(StudentLogin);
-
-
-//window.StudentLogin = StudentLogin;
-
+});

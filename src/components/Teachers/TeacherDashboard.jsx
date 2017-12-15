@@ -4,15 +4,14 @@ import axios from 'axios';
 import { SetAllClassrooms, SetCurrentClassrooms, StoreAllAssessments, SetAllLiveAssignments } from './TeacherActions'
 import Promise from 'bluebird';
 import _ from 'lodash';
-/*
-@connect((store) => {
+import AssignAssessment from './AssignAssessment.jsx'
+
+export default connect((store) => {
   return {
     user_cred: store.authentication.user_cred,
     live_assignments: store.teacher.live_assignments
   }
-})
- */
-
+})(
 class TeacherDashboard extends React.Component {
   constructor(props){
     super(props);
@@ -133,16 +132,4 @@ class TeacherDashboard extends React.Component {
       </Segment>
     )
   }
-}
-
-
-window.TeacherDashboard = connect((store) => {
-  return {
-    user_cred: store.authentication.user_cred,
-    live_assignments: store.teacher.live_assignments
-  }
-})(TeacherDashboard);
-
-
-
-//window.TeacherDashboard = TeacherDashboard;
+});

@@ -5,14 +5,13 @@ import Recorder from 'recorderjs';
 import io from 'socket.io-client';
 import ss from 'socket.io-stream';
 import Promise from 'bluebird'
-/*
-@connect((store) => {
+
+export default connect((store) => {
   return {
     user_cred: store.authentication.user_cred,
     role: store.authentication.role
   }
-})
- */
+})(
 class AssessmentRecording extends React.Component{
   constructor (props) {
     super(props);
@@ -253,16 +252,4 @@ class AssessmentRecording extends React.Component{
       </Container>
     )
   }
-}
-
-
-window.AssessmentRecording = connect((store) => {
-  return {
-    user_cred: store.authentication.user_cred,
-    role: store.authentication.role
-  }
-})(AssessmentRecording);
-
-
-
-// window.AssessmentRecording = AssessmentRecording;
+});

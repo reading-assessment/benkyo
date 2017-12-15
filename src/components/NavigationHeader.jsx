@@ -3,16 +3,15 @@ import { Container, Segment, Menu, Dropdown } from 'semantic-ui-react';
 import { connect } from 'react-redux';
 import axios from 'axios';
 import { SetMainRole, LogOut } from './AuthenticateActions'
-/*
-@connect((store) => {
+
+export default connect((store) => {
   return {
     user_cred: store.authentication.user_cred,
     change_main_view: store.authentication.change_main_view,
     role: store.authentication.role,
   }
-}) */
-
-export default class NavigationHeader extends React.Component {
+})(
+class NavigationHeader extends React.Component {
   constructor(props){
     super(props);
     this.state = {
@@ -63,13 +62,4 @@ export default class NavigationHeader extends React.Component {
       </Menu>
     )
   }
-}
-
-window.NavigationHeader = connect((store) => {
-  return {
-    user_cred: store.authentication.user_cred,
-    change_main_view: store.authentication.change_main_view,
-    role: store.authentication.role,
-  }
-})(NavigationHeader);
-
+})

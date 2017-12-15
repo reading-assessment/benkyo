@@ -4,9 +4,11 @@ import { connect } from 'react-redux';
 import axios from 'axios';
 import {SetMainView, SetUserCred, SetMainRole, SetClassInfo} from './AuthenticateActions'
 
-/******* For Testing Purpose, uncomment only for jest test.  comment for running application *******/
-// import {NavigationHeader} from './NavigationHeader.jsx'
-/***********************************/
+import NavigationHeader from './NavigationHeader.jsx'
+import TeacherLogin from './Teachers/Login/TeacherLogin.jsx'
+import TeacherDashboard from './Teachers/TeacherDashboard.jsx'
+import StudentLogin from './Students/Login/StudentLogin.jsx'
+import StudentDashboard from './Students/StudentDashboard.jsx'
 
 export default class App extends React.Component {
   constructor (props) {
@@ -33,7 +35,7 @@ export default class App extends React.Component {
           if (snapshot.val()){
             // get the "primary" key from the uid node
             if (snapshot.val().primary) {
-              // set the APP state "role" to values of "primary" key in firebase 
+              // set the APP state "role" to values of "primary" key in firebase
               // (Student or Teacher)
               this.props.dispatch(SetMainRole(snapshot.val().primary));
             } else {
@@ -160,5 +162,3 @@ window.App = connect((store) => {
     role: store.authentication.role
   }
 })(App);
-
-// window.App = App;
