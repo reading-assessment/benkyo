@@ -4,7 +4,16 @@ import htmlToText from 'html-to-text';
 import axios from 'axios';
 import {SetCurrentProfile, SetCurrentClasses, SetAllAssigments} from './StudentActions'
 import Promise from 'bluebird';
+import AssessmentRecording from './Recording/AssessmentRecording.jsx'
 
+export default connect((store) => {
+  return {
+    user_cred: store.authentication.user_cred,
+    profile: store.student.profile,
+    enrolledClasses: store.student.enrolledClasses,
+    all_assignments: store.student.all_assignments
+  }
+})(
 class StudentDashboard extends React.Component {
   constructor(props){
     super(props);
@@ -191,13 +200,4 @@ class StudentDashboard extends React.Component {
       </Segment>
     )
   }
-}
-
-window.StudentDashboard = connect((store) => {
-  return {
-    user_cred: store.authentication.user_cred,
-    profile: store.student.profile,
-    enrolledClasses: store.student.enrolledClasses,
-    all_assignments: store.student.all_assignments
-  }
-})(StudentDashboard);
+});
