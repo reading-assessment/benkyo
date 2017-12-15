@@ -1,3 +1,4 @@
+import React from 'react';
 import { Container, Segment, Header, Table, Modal, Image, Item, Divider, Button } from 'semantic-ui-react';
 import { connect } from 'react-redux';
 import htmlToText from 'html-to-text';
