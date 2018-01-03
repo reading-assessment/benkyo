@@ -18,11 +18,13 @@ export default class TeacherDashboard extends React.Component {
 
   componentDidMount() {
     const{user_cred, classrooms} = this.props;
+
     firebase.database().ref(`assessments`).once('value').then(function(snapshot){
+      console.log(this.props);
       this.props.dispatch(StoreAllAssessments(snapshot.val()))
     }.bind(this))
-    new Promise (function(resolve, reject){
 
+    new Promise (function(resolve, reject){
       firebase.database().ref(`teacher/${user_cred.uid}/classes`).once('value').then(function(snapshot){
         var arrayOfClasses = [];
         var currentClassroom = null;
