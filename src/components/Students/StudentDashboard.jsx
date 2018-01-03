@@ -32,43 +32,30 @@ class StudentDashboard extends React.Component {
 
   componentDidMount(){
     const{user_cred} = this.props;
-
-    return new Promise(function(resolve, reject){
-      firebase.database().ref(`/student/${user_cred.uid}/assignment/`).once('value')
-      .then(function(snapshot){
-        snapshot.forEach(function(assignment){
-          if (assignment.val().status === 'done') {
-            firebase.database().ref(`assignment/${assignment.key}/results`).update(assignment.val());
-          }
-        })
-        resolve();
-      })
-    })
-    .then(function(){
-      firebase.database().ref(`student/${user_cred.uid}`).once('value').then(function(snapshot){
-        if (snapshot.val()){
-          this.props.dispatch(SetCurrentProfile(snapshot.val().default_profile));
-          this.props.dispatch(SetCurrentClasses(snapshot.val().classes));
-          var classes = snapshot.val().classes;
-          var ids = [];
-          for (var single_class in classes) {
-            ids.push(classes[single_class].id);
-          }
-          firebase.database().ref(`assignment`).once('value')
-          .then(function(assignment_snap){
-            var all_assignments = [];
-            assignment_snap.forEach(function(each_assignment){
-              if(ids.indexOf(each_assignment.val().studentID)>-1){
-                var obj = each_assignment.val();
-                obj.assignmentID = each_assignment.key;
-                all_assignments.push(obj);
-              }
-            })
-            this.props.dispatch(SetAllAssigments(all_assignments));
-          }.bind(this))
+    firebase.database().ref(`student/${user_cred.uid}`).once('value').then(function(snapshot){
+      if (snapshot.val()){
+        this.props.dispatch(SetCurrentProfile(snapshot.val().default_profile));
+        this.props.dispatch(SetCurrentClasses(snapshot.val().classes));
+        var classes = snapshot.val().classes;
+        // ids are the id of the student for each class in goolge classroom
+        var ids = [];
+        for (var single_class in classes) {
+          ids.push(classes[single_class].id);
         }
-      }.bind(this));
-    }.bind(this))
+        firebase.database().ref(`assignment`).once('value')
+        .then(function(assignment_snap){
+          var all_assignments = [];
+          assignment_snap.forEach(function(each_assignment){
+            if(ids.indexOf(each_assignment.val().studentID)>-1){
+              var obj = each_assignment.val();
+              obj.assignmentID = each_assignment.key;
+              all_assignments.push(obj);
+            }
+          })
+          this.props.dispatch(SetAllAssigments(all_assignments));
+        }.bind(this))
+      }
+    }.bind(this));
   }
 
   StartAssessment(course, assessment, assignment) {

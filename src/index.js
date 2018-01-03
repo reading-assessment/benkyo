@@ -25,8 +25,10 @@ firebase.initializeApp(config);
 /****   Production Mode  ****/
 window.s_mode = {
                   live: false,
-                  base_url: 'https://boiling-hollows-85549.herokuapp.com/',
+                  base_url: 'https://sshenableddo.ioakeimidis.eu/benkyo-auth',
+                  // base_url: 'http://localhost:9007',
                   app_server: 'https://sshenableddo.ioakeimidis.eu/benkyo-api-server'
+                  // app_server: 'http://localhost:9005'
                 }
 
 const app = document.getElementById('app')

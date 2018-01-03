@@ -29,7 +29,7 @@ export default class App extends React.Component {
     firebase.auth().onAuthStateChanged(function(user) {
       // if a user is signed in
       if (user){
-        // get form the user.uid which is the firebase reference to the user its role from the
+        // get from the user.uid which is the firebase reference to the user its role from the
         // roles node of the database
         firebase.database().ref(`roles/${user.uid}`).once('value').then(function(snapshot){
           if (snapshot.val()){
@@ -51,7 +51,7 @@ export default class App extends React.Component {
                 // forEach is a firebase function that loops through all the keys in snapshot
                 // loop through all the classes
                 snapshot.forEach(function(classroom){
-                  // each class has a students node which refer to the classroom's students by id (which id?)
+                  // each class has a students node which refer to the classroom's students by id OF THE GOOGLE CLASSROOM
                   var students = classroom.val().students;
                   // loops through all the students in the class (ids)
                   for (var id in students){

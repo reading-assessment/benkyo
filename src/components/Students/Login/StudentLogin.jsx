@@ -33,9 +33,9 @@ class StudentLogin extends React.Component {
           firebase.database().ref(`roles/${user.uid}`).update({primary:'Student'})
         }
       })
-      this.prop.dispatch(SetMainRole('Student'));
+      this.props.dispatch(SetMainRole('Student'));
       // ...
-    }).catch(function(error) {
+    }.bind(this)).catch(function(error) {
       // Handle Errors here.
       var errorCode = error.code;
       var errorMessage = error.message;
