@@ -1,11 +1,11 @@
 import React from 'react';
-import { Button, Form, Header, Message, Grid, Segment, Progress, Container } from 'semantic-ui-react'
+import { Button, Form, Header, Message, Grid, Segment, Progress, Container, Modal, Divider, Item } from 'semantic-ui-react'
 import axios from 'axios'
 import { connect } from 'react-redux';
 import Recorder from 'recorderjs';
 import io from 'socket.io-client';
 import ss from 'socket.io-stream';
-import Promise from 'bluebird'
+import Promise from 'bluebird';
 
 export default connect((store) => {
   return {
@@ -22,11 +22,17 @@ class AssessmentRecording extends React.Component{
       input: null,
       recorder: null,
       percentComplete: 0,
-      finishedRecording: false
+      finishedRecording: false,
+      openStartModal: false,
+      countdownSeconds: 10
     }
     this.startRecording = this.startRecording.bind(this);
     this.stopRecording = this.stopRecording.bind(this);
     this.cleanAudioBlob = this.cleanAudioBlob.bind(this);
+    this.openStartCountdownModal = this.openStartCountdownModal.bind(this);
+    this.closeStartCountdownModal = this.closeStartCountdownModal.bind(this);
+    this.countdown = this.countdown.bind(this);
+    this.startCountdown = this.startCountdown.bind(this);
   }
 
     /**
@@ -81,7 +87,9 @@ class AssessmentRecording extends React.Component{
     var URL_SERVER = window.s_mode.app_server;
     // io is a globally available variable from socketio cdn that is imported
     var socket = io.connect(URL_SERVER);
+    // console.log('seconds', blob.size/1024/1536*8);
     socket.emit('bucket-stored', {
+      wavSize: blob.size,
       user_cred,
       classroomId,
       assessmentId,
@@ -91,55 +99,22 @@ class AssessmentRecording extends React.Component{
     }, (confirmation)=>{
       if (confirmation) {
         socket.disconnect();
+        this.setState({finishedRecording: true});
       }
     });
-    // ------OLD CODE when we sent the file to DO instead of google bucket---------
-    // ss is socketio-stream globally available variable from imported file
-    // var socketioStream = ss.createStream();
-    // ss(socket).emit('client-stream-request', socketioStream, {
-    //   // wavFileSize: blob.size,
-    //   studentId : user_cred.uid,
-    //   classroomId: classroomId,
-    //   assessmentId: assessmentId,  // T1. T2. Z1. Z2
-    //   assignmentId: assignmentId //firebase pushed key for location of assessment data
-    // }, function(confirmation) {
-    //   // console.log(confirmation);
-    //   socket.disconnect(URL_SERVER);
-    //   // this.setState({finishedRecording: true});
-    // }.bind(this));
-    // var blobStream = ss.createBlobReadStream(blob);
-    // var size = 0;
-
-    // blobStream.on('data', function(chunk){
-    //   size += chunk.length;
-
-    //   this.setState({percentComplete: size / blob.size * 100})
-    //   // console.log(Math.floor(size / AudioBLOB.size * 100) + '%');
-    //   if (size / blob.size >= 1){
-    //     firebase.database().ref(`student/${user_cred.uid}/assignment/${assignmentId}`).update({status:'processing'});
-    //     firebase.database().ref(`assignment/${assignmentId}/results`).update({status:'processing'});
-    //   }
-    // }.bind(this));
-    // blobStream.pipe(socketioStream);
-
-    // socket.disconnect(URL_SERVER);
-    // code before the progress bar
-    // ss.createBlobReadStream(AudioBLOB).pipe(socketioStream);
-    // ---------------------END OLD CODE--------------------------------
-
+    // ----------------JOHN CODE END--------------------------
     //------Append wav file to li item and make it available in HTML5 audio player
     var url = URL.createObjectURL(blob);
     var li = document.createElement('li');
     var au = document.createElement('audio');
     var hf = document.createElement('a');
-
+    
     au.controls = true;
     au.src = url;
     hf.href = url;
     // Important:
     // Change the format of the file according to the mimetype
     // e.g for audio/wav the extension is .wav
-    //     for audio/mpeg (mp3) the extension is .mp3
     hf.download = new Date().toISOString() + '.wav';
     hf.innerHTML = hf.download;
     li.appendChild(au);
@@ -162,7 +137,7 @@ class AssessmentRecording extends React.Component{
     window.audio_stream.getAudioTracks()[0].stop();
 
     // Disable Stop button and enable Record button !
-    this.setState({recording_started: false})
+    this.setState({recording_started: false});
 
     // Use the Recorder Library to export the recorder Audio as a .wav file
     // The callback providen in the stop recording method receives the blob
@@ -172,11 +147,10 @@ class AssessmentRecording extends React.Component{
     * you provide the second argument of the function
     */
     // Custom library
+    var d = new Date();
+    var timestamp = d.getTime().toString();
     window.recorder && window.recorder.exportWAV(function (blob) {
-      var d = new Date();
-      var timestamp = d.getTime().toString();
       var fileName = user_cred.uid + 'TTTT' + timestamp + '.wav';
-      console.log(timestamp);
       var audioRef = firebase.storage().ref().child(`audio/${fileName}`);
       var uploadTask = audioRef.put(blob);
       uploadTask.on('state_changed', function(snapshot){
@@ -186,70 +160,70 @@ class AssessmentRecording extends React.Component{
       }.bind(this), function (error){
 
       }, function(){
-        var d = new Date();
-        var timestamp = d.getTime().toString();
         var filePrefix = user_cred.uid + 'TTTT' + timestamp;
         var fileNameWAV = filePrefix + '.wav';
         var downloadURL = uploadTask.snapshot.downloadURL;
         this.cleanAudioBlob(blob, downloadURL, filePrefix);
-
         console.log('Uploaded a blob', downloadURL);
+        const {audioContext} = this.state;
+        // var frameCount = audioContext.sampleRate * 2.0;
+        // var myArrayBuffer = audioContext.createBuffer(2, frameCount, audioContext.sampleRate);
+        // console.log(myArrayBuffer.duration);
       }.bind(this));
-      // ----------MAX working code------------
-      // audioRef.put(blob).then(function(snapshot){
-      //   firebase.database().ref(`student/${user_cred.uid}/assignment/${assignmentId}`).update({status:'processing'});
-      //   firebase.database().ref(`assignment/${assignmentId}/results`).update({status:'processing'});
-      //   console.log('Uploaded a blob');
-      //   this.cleanAudioBlob(blob);
-      // }.bind(this));
-      //----------END OF MAX WORKING CODE, BEGIN MAX COMMENTS-------------
-      // console.log(blob);
-      // new Promise(function(resolve, reject) {
-      //   Notification.requestPermission(function(result) {
-      //     if (result !== 'granted') return reject(Error("Denied notification permission"));
-      //     resolve();
-      //   })
-      // }).then(function() {
-      //   return navigator.serviceWorker;
-      // }).then(function(reg) {
-      //   var options = {
-      //     blob: blob,
-      //     uid: user_cred.uid,
-      //     classroomId: classroomId,
-      //     assessmentId: assessmentId,
-      //     assignmentId: assignmentId
-      //   }
-      //   reg.controller.postMessage({type: 'upload', options});
-      //   return navigator.serviceWorker.ready;
-      // }).then(function(reg) {
-      //   return reg.sync.register("Let's Upload!");
-      // }).catch(function(err) {
-      //   console.log('It broke');
-      //   console.log(err.message);
-      // });
-
-
-
-      // create WAV download link using audio data blob
-      // createDownloadLink();
 
       // Clear the Recorder to start again !
       window.recorder.clear();
     }.bind(this), ("audio/mpeg" || "audio/wav"));
   }
 
+
+  startCountdown() {
+    this.setState({countdownSeconds: 10});
+    var interval= setInterval(this.countdown.bind(this), 1000);
+    this.setState({interval: interval});
+  }
+
+  countdown() {
+    var current = this.state.countdownSeconds;
+    current--;
+    this.setState({countdownSeconds: current});
+    if (this.state.countdownSeconds === 0) {
+      clearInterval(this.state.interval);
+      this.closeStartCountdownModal();
+    }
+  }
+
+  openStartCountdownModal() {
+    this.setState({openStartModal: true});
+    this.startCountdown();
+  }
+
+  closeStartCountdownModal() {
+    this.setState({openStartModal: false});
+    this.startRecording();
+  }
+
   render() {
-    const {recording_started, percentComplete, finishedRecording} = this.state;
+    const {recording_started, percentComplete, finishedRecording, countdownSeconds} = this.state;
     return (
       <Container>
         <Button.Group labeled icon fluid>
-          <Button disabled={recording_started} onClick={this.startRecording} icon='unmute' content='Start Recording' color='green'/>
+          <Button disabled={recording_started} onClick={this.openStartCountdownModal} icon='unmute' content='Start Recording' color='green'/>
           <Button disabled={!recording_started} onClick={this.stopRecording} icon='stop' content='Stop recording' color='red'/>
         </Button.Group>
 
         <Header as='h2'>Stored Recordings</Header>
         <ol id="recordingslist"></ol>
-        <Progress value="0" total="100" percent={Math.floor(percentComplete)} indicating progress='percent'>{(finishedRecording)?('Upload Completed! =D'):null}</Progress>
+        <Progress percent={Math.floor(percentComplete)} indicating progress='percent'>{(finishedRecording)?('Upload Completed! =D'):null}</Progress>
+        <Modal size='large' open={this.state.openStartModal}>
+          <Modal.Header>
+            <Container textAlign='center'>
+                Get Ready! Your assessment will start in
+              <Divider/>
+              <Header as='h1' color='red' textAlign='center'> {countdownSeconds}</Header>
+            </Container>
+          </Modal.Header>
+        </Modal>
       </Container>
     )
   }

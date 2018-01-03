@@ -19,6 +19,7 @@ class TeacherDashboard extends React.Component {
     this.state = {
     }
     this.handleSort = this.handleSort.bind(this)
+    this.handleDelete = this.handleDelete.bind(this)
   }
 
   componentDidMount() {
@@ -26,14 +27,16 @@ class TeacherDashboard extends React.Component {
     firebase.database().ref(`assessments`).once('value').then(function(snapshot){
       this.props.dispatch(StoreAllAssessments(snapshot.val()))
     }.bind(this))
-    return new Promise (function(resolve, reject){
+    new Promise (function(resolve, reject){
 
       firebase.database().ref(`teacher/${user_cred.uid}/classes`).once('value').then(function(snapshot){
         var arrayOfClasses = [];
         var currentClassroom = null;
+        // How does this works, as it sores an array with the -primary content and the class content?
         snapshot.forEach(function(classes){
           arrayOfClasses.push(classes.val());
           if (!currentClassroom) {
+            // does it resolve ONLY in the first classroom that it finds?
             currentClassroom = classes.val();
             resolve(currentClassroom);
             firebase.database().ref(`/classes/${currentClassroom}`).once('value').then(function(snapshot){
@@ -52,19 +55,23 @@ class TeacherDashboard extends React.Component {
         if (snapshot.val()) {
           var allLiveAssignments = [];
           snapshot.forEach(function(assignment){
+            var assignmentId = assignment.key;
             var results = assignment.val().results;
             var score = (results)?results.scoreFromCompareWord:null;
             var flacFile = (results)?results.publicFlacURL:null;
-
+            var wordsPerMinute = (results)?results.transcribedWordsPerMinute:null;
             var obj = {
+              assignmentId,
+              email: assignment.val().studentInfo.emailAddress,
               name: assignment.val().studentInfo.name.fullName,
               assessment: assignment.val().assessment,
               status: (results)?results.status:'Have not started',
               score: (score !== undefined && score !== null)?(<span>{new Number(score*100).toFixed(0).toString() + '%'}</span>):null,
-              flac: (flacFile)?(<audio controls preload='auto'><source src={flacFile} type="audio/flac"/></audio>):null
+              flac: (flacFile)?(<audio controls preload='auto'><source src={flacFile} type="audio/flac"/></audio>):null,
+              wordsPerMinute: (wordsPerMinute !== undefined && wordsPerMinute !== null)?wordsPerMinute:null
             }
             allLiveAssignments.push(obj);
-          })
+          });
           this.props.dispatch(SetAllLiveAssignments(allLiveAssignments));
         }
       }.bind(this))
@@ -90,9 +97,33 @@ class TeacherDashboard extends React.Component {
     this.props.dispatch(SetAllLiveAssignments(live_assignments.reverse()));
   }
 
+  handleDelete(assignmentId, email){
+    const {live_assignments} = this.props;
+    var liveAssignmentsCopy = live_assignments.slice(0);
+    _.remove(liveAssignmentsCopy, (item)=>{ return item.assignmentId === assignmentId });
+    this.props.dispatch(SetAllLiveAssignments(liveAssignmentsCopy));
+    var emailWithCommas = email.replace(/\./g, ',');
+    firebase.database().ref(`emailToUid/${emailWithCommas}`).once('value').then(function(snapshot){
+      if (snapshot.val()){
+        var clickedStudentUid = snapshot.val();
+        firebase.database().ref(`student/${clickedStudentUid}/assignment/${assignmentId}`).once('value').then(function(snapshot){
+          if (snapshot.val()) {
+            firebase.database().ref(`student/${clickedStudentUid}/assignment/${assignmentId}`).remove().then(function(snapshot){
+              console.log("successful removed #1 ", assignmentId);
+            });
+          }
+        });
+      }
+    });
+    firebase.database().ref(`assignment/${assignmentId}`).remove().then(function (snapshot) {
+      console.log("successful removed #2 ", assignmentId);
+    });
+  }
+
   render() {
-    const {dummyData, live_assignments, user_cred} = this.props;
+    const {live_assignments, user_cred} = this.props;
     const {column, direction} = this.state;
+
     return (
       <Segment vertical>
         <Grid>
@@ -107,18 +138,20 @@ class TeacherDashboard extends React.Component {
                     <Table.HeaderCell sorted={column === 'status' ? direction : null} onClick={()=>{this.handleSort('status')}}>Status</Table.HeaderCell>
                     <Table.HeaderCell sorted={column === 'score' ? direction : null} onClick={()=>{this.handleSort('score')}}>Raw Score</Table.HeaderCell>
                     <Table.HeaderCell>Recording</Table.HeaderCell>
+                    <Table.HeaderCell>Delete</Table.HeaderCell>
                   </Table.Row>
                 </Table.Header>
 
                 <Table.Body>
                   {live_assignments.map((assignment, key)=>{
                     return (
-                      <Table.Row>
+                      <Table.Row key={key}>
                         <Table.Cell>{assignment.name}</Table.Cell>
                         <Table.Cell>{assignment.assessment}</Table.Cell>
                         <Table.Cell>{assignment.status}</Table.Cell>
                         <Table.Cell>{assignment.score}</Table.Cell>
                         <Table.Cell>{assignment.flac}</Table.Cell>
+                        <Table.Cell textAlign="center"><Icon onClick={this.handleDelete.bind(null, assignment.assignmentId, assignment.email)} name="window close"/></Table.Cell>
                       </Table.Row>
                     )
                   })}
