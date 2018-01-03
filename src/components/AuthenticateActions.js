@@ -30,3 +30,15 @@ export function LogOut () {
     type: 'LOG_OUT'
   }
 }
+
+export function StudentLogOut () {
+  return {
+    type: 'STUDENT_LOG_OUT'
+  }
+}
+
+export function TeacherLogOut () {
+  return {
+    type: 'TEACHER_LOG_OUT'
+  }
+}

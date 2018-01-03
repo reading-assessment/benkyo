@@ -30,8 +30,15 @@ export default class App extends React.Component {
       // if a user is signed in
       if (user){
         // get from the user.uid which is the firebase reference to the user its role from the
+
+        // set the APP state of user_cred to user
+        this.props.dispatch(SetUserCred(user));
+
         // roles node of the database
         firebase.database().ref(`roles/${user.uid}`).once('value').then(function(snapshot){
+          // set the APP state of change_main_view to "Landing Page"
+          this.props.dispatch(SetMainView('Landing Page'));
+          
           if (snapshot.val()){
             // get the "primary" key from the uid node
             if (snapshot.val().primary) {
@@ -40,8 +47,10 @@ export default class App extends React.Component {
               this.props.dispatch(SetMainRole(snapshot.val().primary));
             } else {
               // if the primary role has not been set, set the APP state role to "Select_Role"
-              this.props.dispatch(SetMainRole('Select_Role'))
+              this.props.dispatch(SetMainRole('Select_Role')) //<=====
             }
+
+            console.log(snapshot.val().primary);
             // if the primary role is student, as we get it from firebase
             if (snapshot.val().primary === 'Student'){
               // go to the "classes" node, get all the classes
@@ -74,10 +83,6 @@ export default class App extends React.Component {
             }
           }
         }.bind(this))
-        // set the APP state of change_main_view to "Landing Page"
-        this.props.dispatch(SetMainView('Landing Page'));
-        // set the APP state of user_cred to user
-        this.props.dispatch(SetUserCred(user));
       } else {
         // if no user is signed in
         // set the APP role state to Student
@@ -91,37 +96,35 @@ export default class App extends React.Component {
   render() {
     // get values from the APP state
     const { user_cred, change_main_view, role } = this.props;
+    console.log(change_main_view, role);
     // if no user is signed in
-    if (change_main_view === 'Login') {
-      if (role === 'Teacher'){
+    if (change_main_view === 'Login' && role === 'Teacher') {
         var renderLogin = (
           <TeacherLogin/>
         )
-      } else if (role === 'Student') {
+    } else if (change_main_view === 'Login' && role === 'Student') {
         var renderLogin = (
           <StudentLogin/>
         )
-      }
-    } else if (change_main_view === 'Landing Page') {
+    } else if (change_main_view === 'Landing Page' && role === 'Teacher') {
       // if the user is signed in as Teacher
-      if (role === 'Teacher'){
         var renderLogin = (
           <TeacherDashboard/>
         )
-      } else if (role === 'Student') {
+    } else if (change_main_view === 'Landing Page' && role === 'Student') {
         // if the user is signed in as Student
         var renderLogin = (
           <div>
             <StudentDashboard/>
           </div>
         )
-      } else if (role === 'Select_Role') {
+    } else if (change_main_view === 'Landing Page' && role === 'Select_Role') {
         // if user is logen in but primary role has not been set in firebase
         var renderLogin = (
           <VerifyRole/>
         )
         // show loader
-      } else {
+    } else if (change_main_view === 'Landing Page') {
         var renderLogin = (
           <Segment>
             <Dimmer active>
@@ -130,7 +133,6 @@ export default class App extends React.Component {
             <Image src='https://firebasestorage.googleapis.com/v0/b/benkyohr-e00dc.appspot.com/o/elements%2Fshort-paragraph.png?alt=media&token=3b02b482-c6b7-42a6-ad03-c66c0a8f94b3' />
           </Segment>
         )
-      }
       // show loader while autheticating
     } else if (change_main_view === 'Authenticating'){
       var renderLogin = (

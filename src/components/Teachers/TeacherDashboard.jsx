@@ -7,7 +7,13 @@ import Promise from 'bluebird';
 import _ from 'lodash';
 import AssignAssessment from './AssignAssessment.jsx'
 
-export default class TeacherDashboard extends React.Component {
+export default connect((store) => {
+  return {
+    user_cred: store.authentication.user_cred,
+    live_assignments: store.teacher.live_assignments
+  }
+})(
+class TeacherDashboard extends React.Component {
   constructor(props){
     super(props);
     this.state = {
@@ -18,13 +24,11 @@ export default class TeacherDashboard extends React.Component {
 
   componentDidMount() {
     const{user_cred, classrooms} = this.props;
-
     firebase.database().ref(`assessments`).once('value').then(function(snapshot){
-      console.log(this.props);
       this.props.dispatch(StoreAllAssessments(snapshot.val()))
     }.bind(this))
-
     new Promise (function(resolve, reject){
+
       firebase.database().ref(`teacher/${user_cred.uid}/classes`).once('value').then(function(snapshot){
         var arrayOfClasses = [];
         var currentClassroom = null;
@@ -139,7 +143,7 @@ export default class TeacherDashboard extends React.Component {
                 </Table.Header>
 
                 <Table.Body>
-                  {(live_assignments)?live_assignments.map((assignment, key)=>{
+                  {live_assignments.map((assignment, key)=>{
                     return (
                       <Table.Row key={key}>
                         <Table.Cell>{assignment.name}</Table.Cell>
@@ -150,7 +154,7 @@ export default class TeacherDashboard extends React.Component {
                         <Table.Cell textAlign="center"><Icon onClick={this.handleDelete.bind(null, assignment.assignmentId, assignment.email)} name="window close"/></Table.Cell>
                       </Table.Row>
                     )
-                  }):null}
+                  })}
                 </Table.Body>
               </Table>
             </Grid.Column>
@@ -162,11 +166,4 @@ export default class TeacherDashboard extends React.Component {
       </Segment>
     )
   }
-}
-
-window.TeacherDashboard = connect((store) => {
-  return {
-    user_cred: store.authentication.user_cred,
-    live_assignments: store.teacher.live_assignments
-  }
-})(TeacherDashboard);
+});

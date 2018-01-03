@@ -32,6 +32,7 @@ class StudentDashboard extends React.Component {
 
   componentDidMount(){
     const{user_cred} = this.props;
+    console.log('mounting StudentDashboard', user_cred.uid);
     firebase.database().ref(`student/${user_cred.uid}`).once('value').then(function(snapshot){
       if (snapshot.val()){
         this.props.dispatch(SetCurrentProfile(snapshot.val().default_profile));

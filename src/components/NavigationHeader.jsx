@@ -2,7 +2,7 @@ import React from 'react';
 import { Container, Segment, Menu, Dropdown } from 'semantic-ui-react';
 import { connect } from 'react-redux';
 import axios from 'axios';
-import { SetMainRole, LogOut } from './AuthenticateActions'
+import { SetMainRole, LogOut, StudentLogOut, TeacherLogOut } from './AuthenticateActions'
 
 export default connect((store) => {
   return {
@@ -24,6 +24,8 @@ class NavigationHeader extends React.Component {
     firebase.auth().signOut().then(function() {
       // Sign-out successful.
       this.props.dispatch(LogOut());
+      this.props.dispatch(StudentLogOut());
+      this.props.dispatch(TeacherLogOut());
     }.bind(this)).catch(function(error) {
       // An error happened.
     });

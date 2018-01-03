@@ -20,6 +20,13 @@ export default function reducer( state = {
         all_assignments: action.payload.all_assignments
       }
     }
+    case 'STUDENT_LOG_OUT': {
+      return {...state,
+        profile: {},
+        enrolledClasses: {},
+        all_assignments: []
+      }
+    }
   }
   return state;
 }

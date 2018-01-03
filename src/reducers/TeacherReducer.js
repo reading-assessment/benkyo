@@ -49,6 +49,17 @@ export default function reducer( state = {
         selected_assessment: null
       }
     }
+    case 'TEACHER_LOG_OUT': {
+      return {...state,
+        currentClassroom: {},
+        classrooms: [],
+        live_assignments: [],
+        current_target_student: null,
+        all_assessments: null,
+        selected_assessment: null,
+        done_selecting: false
+      }
+    }
   }
   return state;
 }
