@@ -3,7 +3,8 @@
     "public": "/",
     "ignore": [
       "firebase.json",
-      "**/src/**"
+      "**/src/**",
+      "**/node_modules/**"
     ]
   }
 }
