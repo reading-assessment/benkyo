@@ -7,13 +7,7 @@ import Promise from 'bluebird';
 import _ from 'lodash';
 import AssignAssessment from './AssignAssessment.jsx'
 
-export default connect((store) => {
-  return {
-    user_cred: store.authentication.user_cred,
-    live_assignments: store.teacher.live_assignments
-  }
-})(
-class TeacherDashboard extends React.Component {
+export default class TeacherDashboard extends React.Component {
   constructor(props){
     super(props);
     this.state = {
@@ -143,7 +137,7 @@ class TeacherDashboard extends React.Component {
                 </Table.Header>
 
                 <Table.Body>
-                  {live_assignments.map((assignment, key)=>{
+                  {(live_assignments)?live_assignments.map((assignment, key)=>{
                     return (
                       <Table.Row key={key}>
                         <Table.Cell>{assignment.name}</Table.Cell>
@@ -154,7 +148,7 @@ class TeacherDashboard extends React.Component {
                         <Table.Cell textAlign="center"><Icon onClick={this.handleDelete.bind(null, assignment.assignmentId, assignment.email)} name="window close"/></Table.Cell>
                       </Table.Row>
                     )
-                  })}
+                  }):null}
                 </Table.Body>
               </Table>
             </Grid.Column>
@@ -166,4 +160,11 @@ class TeacherDashboard extends React.Component {
       </Segment>
     )
   }
-});
+}
+
+window.TeacherDashboard = connect((store) => {
+  return {
+    user_cred: store.authentication.user_cred,
+    live_assignments: store.teacher.live_assignments
+  }
+})(TeacherDashboard);
