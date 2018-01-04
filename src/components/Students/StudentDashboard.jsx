@@ -1,9 +1,10 @@
 import React from 'react';
-import { Container, Segment, Header, Table, Modal, Image, Item, Divider, Button } from 'semantic-ui-react';
+import { Container, Segment, Header, Table, Modal, Image, Item, Divider, Button, Grid } from 'semantic-ui-react';
 import { connect } from 'react-redux';
 import htmlToText from 'html-to-text';
 import axios from 'axios';
-import {SetCurrentProfile, SetCurrentClasses, SetAllAssigments} from './StudentActions'
+import { LogOut, StudentLogOut, TeacherLogOut } from '../AuthenticateActions'
+import {SetCurrentProfile, SetCurrentClasses, SetAllAssigments, SetActiveAssignment} from './StudentActions'
 import Promise from 'bluebird';
 import AssessmentRecording from './Recording/AssessmentRecording.jsx'
 
@@ -12,7 +13,8 @@ export default connect((store) => {
     user_cred: store.authentication.user_cred,
     profile: store.student.profile,
     enrolledClasses: store.student.enrolledClasses,
-    all_assignments: store.student.all_assignments
+    all_assignments: store.student.all_assignments,
+    active_assignment: store.student.active_assignment
   }
 })(
 class StudentDashboard extends React.Component {
@@ -24,10 +26,17 @@ class StudentDashboard extends React.Component {
       current_assignment: null,
       current_assessment_text: null,
       current_assessment_image: null,
-      open_assessment_modal: false
+      open_assessment_modal: false,
+      introduction: true,
+      prepartion: false
     }
     this.StartAssessment = this.StartAssessment.bind(this);
     this.CloseAssessment = this.CloseAssessment.bind(this);
+    this.prepare_mindset = this.prepare_mindset.bind(this);
+    this.proceed_assignment = this.proceed_assignment.bind(this);
+    this.logout = this.logout.bind(this);
+    this.startCountdown = this.startCountdown.bind(this);
+    this.countdown = this.countdown.bind(this);
   }
 
   componentDidMount(){
@@ -57,6 +66,67 @@ class StudentDashboard extends React.Component {
         }.bind(this))
       }
     }.bind(this));
+  }
+
+  logout() {
+    firebase.auth().signOut().then(function() {
+      // Sign-out successful.
+      this.props.dispatch(LogOut());
+      this.props.dispatch(StudentLogOut());
+      this.props.dispatch(TeacherLogOut());
+    }.bind(this)).catch(function(error) {
+      // An error happened.
+    });
+  }
+
+  prepare_mindset() {
+    const {profile, user_cred, enrolledClasses, all_assignments} = this.props;
+    if (all_assignments.length>0){
+      var active_assignment = all_assignments[0];
+      console.log(active_assignment);
+      this.props.dispatch(SetActiveAssignment(active_assignment));
+
+      firebase.database().ref(`assessments/${active_assignment.assessment}`).once('value')
+      .then(function(snapshot){
+        if (snapshot.val()){
+          var text = snapshot.val().Text.long;
+          var image = snapshot.val().meta.image_url;
+          this.setState({
+            current_assessment_text: text,
+            current_assessment_image: image
+          })
+        }
+      }.bind(this))
+      this.setState({introduction:false, prepartion:true})
+    }
+  }
+
+  proceed_assignment() {
+    const {profile, user_cred, enrolledClasses, all_assignments, active_assignment} = this.props;
+    firebase.database().ref(`student/${user_cred.uid}/assignment/${active_assignment.assignmentID}`).update({status:'initiated'})
+    firebase.database().ref(`assignment/${active_assignment.assignmentID}/results`).update({status:'initiated'})
+    this.setState({
+      open_assessment_modal:true,
+      current_course: active_assignment.courseID,
+      current_assessment: active_assignment.assessment,
+      current_assignment: active_assignment.assignmentID
+    })
+  }
+
+  startCountdown() {
+    this.setState({countdownSeconds: 10});
+    var interval= setInterval(this.countdown, 1000);
+    this.setState({interval: interval});
+  }
+
+  countdown() {
+    var current = this.state.countdownSeconds;
+    current--;
+    this.setState({countdownSeconds: current});
+    if (this.state.countdownSeconds === 0) {
+      clearInterval(this.state.interval);
+      this.closeStartCountdownModal();
+    }
   }
 
   StartAssessment(course, assessment, assignment) {
@@ -93,8 +163,20 @@ class StudentDashboard extends React.Component {
   }
 
   render() {
-    const {profile, user_cred, enrolledClasses, all_assignments} = this.props;
-    const {current_course, current_assignment, current_assessment, current_assessment_image, current_assessment_text, open_assessment_modal} = this.state;
+    const {profile, user_cred, enrolledClasses, all_assignments, active_assignment} = this.props;
+    const {current_course, current_assignment, current_assessment, current_assessment_image, current_assessment_text, open_assessment_modal, introduction, prepartion} = this.state;
+
+    if (profile.name) {
+      var renderGreeting = (
+        <Header as='h2'>Hello! You are logged in as {profile.name.fullName}<br/></Header>
+      )
+      var renderPreparation = (
+        <Header as='h2'>{profile.name.givenName}, you are going to take an assessment about<br/></Header>
+      )
+      var renderAssignmentImage = (
+        <Image src={current_assessment_image}/>
+      )
+    }
 
     return (
       <Segment vertical>
@@ -184,6 +266,45 @@ class StudentDashboard extends React.Component {
               <Divider />
               <AssessmentRecording classroomId={current_course} assessmentId={current_assessment} assignmentId={current_assignment}/>
             </Modal.Description>
+          </Modal.Content>
+        </Modal>
+        <Modal size='fullscreen' open={introduction} style={{height: '97vh'}}>
+          <Modal.Content>
+            <Grid textAlign='center'>
+              <Grid.Row style={{height: '95vh'}}>
+                <Grid.Column verticalAlign='middle'>
+                  {renderGreeting}
+                  <Header as='h2'>
+                    Is this correct?
+                    <br/>
+                    <br/>
+                    <Button.Group size='big'>
+                      <Button positive onClick={this.prepare_mindset}>Yes</Button>
+                      <Button.Or />
+                      <Button onClick={this.logout}>No</Button>
+                    </Button.Group>
+                  </Header>
+                </Grid.Column>
+              </Grid.Row>
+            </Grid>
+          </Modal.Content>
+        </Modal>
+        <Modal size='fullscreen' open={prepartion} style={{height: '97vh'}}>
+          <Modal.Content>
+            <Grid textAlign='center'>
+              <Grid.Row style={{height: '95vh'}}>
+                <Grid.Column verticalAlign='middle'>
+                  {renderPreparation}
+                  {renderAssignmentImage}
+                  <Header as='h2'>
+                    Are you ready to begin?
+                    <br/>
+                    <br/>
+                    <Button circular positive size='huge' onClick={this.proceed_assignment}>Start</Button>
+                  </Header>
+                </Grid.Column>
+              </Grid.Row>
+            </Grid>
           </Modal.Content>
         </Modal>
       </Segment>

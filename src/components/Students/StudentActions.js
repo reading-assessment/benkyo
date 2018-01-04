@@ -24,3 +24,12 @@ export function SetAllAssigments (assignments) {
     }
   }
 }
+
+export function SetActiveAssignment (active_assignment) {
+  return {
+    type: 'SET_ACTIVE_ASSIGNMENT', 
+    payload: {
+      active_assignment: active_assignment
+    }
+  }
+}

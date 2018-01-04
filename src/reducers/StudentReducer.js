@@ -1,7 +1,8 @@
 export default function reducer( state = {
   profile: {},
   enrolledClasses: {},
-  all_assignments: []
+  all_assignments: [],
+  active_assignment: null
   }, action ) {
 
   switch (action.type) {
@@ -25,6 +26,11 @@ export default function reducer( state = {
         profile: {},
         enrolledClasses: {},
         all_assignments: []
+      }
+    }
+    case 'SET_ACTIVE_ASSIGNMENT': {
+      return {...state, 
+        active_assignment: action.payload.active_assignment
       }
     }
   }

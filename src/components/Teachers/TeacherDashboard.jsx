@@ -1,5 +1,5 @@
 import React from 'react';
-import { Table, Checkbox, Button, Icon, Segment, Grid } from 'semantic-ui-react';
+import { Table, Checkbox, Button, Icon, Segment, Grid, Divider, Modal, Header } from 'semantic-ui-react';
 import { connect } from 'react-redux';
 import axios from 'axios';
 import { SetAllClassrooms, SetCurrentClassrooms, StoreAllAssessments, SetAllLiveAssignments } from './TeacherActions'
@@ -17,9 +17,15 @@ class TeacherDashboard extends React.Component {
   constructor(props){
     super(props);
     this.state = {
+      more_details: false,
+      magnify_assessmentID: null,
+      magnify_flac: null,
+      magnify_transcribedText: null
     }
     this.handleSort = this.handleSort.bind(this)
     this.handleDelete = this.handleDelete.bind(this)
+    this.ViewMoreDetails = this.ViewMoreDetails.bind(this)
+    this.resetModal = this.resetModal.bind(this);
   }
 
   componentDidMount() {
@@ -38,6 +44,7 @@ class TeacherDashboard extends React.Component {
           if (!currentClassroom) {
             // does it resolve ONLY in the first classroom that it finds?
             currentClassroom = classes.val();
+            console.log(currentClassroom);
             resolve(currentClassroom);
             firebase.database().ref(`/classes/${currentClassroom}`).once('value').then(function(snapshot){
               if (snapshot.val()){
@@ -55,6 +62,7 @@ class TeacherDashboard extends React.Component {
         if (snapshot.val()) {
           var allLiveAssignments = [];
           snapshot.forEach(function(assignment){
+            console.log(assignment.val());
             var assignmentId = assignment.key;
             var results = assignment.val().results;
             var score = (results)?results.scoreFromCompareWord:null;
@@ -75,12 +83,13 @@ class TeacherDashboard extends React.Component {
               name: assignment.val().studentInfo.name.fullName,
               assessment: assignment.val().assessment,
               status: (results)?results.status:'Have not started',
-              score: (score !== undefined && score !== null)?(<span>{new Number(score*100).toFixed(0).toString() + '%'}</span>):null,
+              score: (score !== undefined && score !== null)?(score):null,
               flac: (flacFile)?(<audio controls preload='auto'><source src={flacFile} type="audio/flac"/></audio>):null,
               wordsPerMinute: (wordsPerMinute !== undefined && wordsPerMinute !== null)?wordsPerMinute:null,
               numOfRecordingSeconds: (numOfRecordingSeconds !== undefined && numOfRecordingSeconds !== null)?numOfRecordingSeconds:null,
               timeStamp: (timeStamp !== undefined && timeStamp !== null)?timeStamp:null,
-              strDate: (strDate !== undefined && strDate !== null)?strDate:null
+              strDate: (strDate !== undefined && strDate !== null)?strDate:null,
+              transcribedText: (assignment.val().results)?assignment.val().results.transcribedText:null
             }
             allLiveAssignments.push(obj);
           });
@@ -88,6 +97,27 @@ class TeacherDashboard extends React.Component {
         }
       }.bind(this))
     }.bind(this))
+  }
+
+  ViewMoreDetails(student, assessmentID, flac_info, transcribedText) {
+    console.log(assessmentID, flac_info, transcribedText);
+    this.setState({
+      magnify_student: student,
+      magnify_assessmentID: assessmentID,
+      magnify_flac: flac_info,
+      magnify_transcribedText: transcribedText,
+      more_details: true
+    })
+  }
+
+  resetModal() {
+    this.setState({
+      magnify_student: null,
+      magnify_assessmentID: null,
+      magnify_flac: null,
+      magnify_transcribedText: null,
+      more_details: false
+    })
   }
 
   handleSort(clickedColumn) {
@@ -110,35 +140,41 @@ class TeacherDashboard extends React.Component {
   }
 
   handleDelete(assignmentId, email){
-    const {live_assignments} = this.props;
-    var liveAssignmentsCopy = live_assignments.slice(0);
-    _.remove(liveAssignmentsCopy, (item)=>{ return item.assignmentId === assignmentId });
-    this.props.dispatch(SetAllLiveAssignments(liveAssignmentsCopy));
-    var emailWithCommas = email.replace(/\./g, ',');
-    firebase.database().ref(`emailToUid/${emailWithCommas}`).once('value').then(function(snapshot){
-      if (snapshot.val()){
-        var clickedStudentUid = snapshot.val();
-        firebase.database().ref(`student/${clickedStudentUid}/assignment/${assignmentId}`).once('value').then(function(snapshot){
-          if (snapshot.val()) {
-            firebase.database().ref(`student/${clickedStudentUid}/assignment/${assignmentId}`).remove().then(function(snapshot){
-              console.log("successful removed #1 ", assignmentId);
-            });
-          }
-        });
-      }
-    });
-    firebase.database().ref(`assignment/${assignmentId}`).remove().then(function (snapshot) {
-      console.log("successful removed #2 ", assignmentId);
-    });
+    var confirmDelete = confirm('Are you sure you want to delete?');
+    if (confirmDelete) {
+      const {live_assignments} = this.props;
+      var liveAssignmentsCopy = live_assignments.slice(0);
+      _.remove(liveAssignmentsCopy, (item)=>{ return item.assignmentId === assignmentId });
+      this.props.dispatch(SetAllLiveAssignments(liveAssignmentsCopy));
+      var emailWithCommas = email.replace(/\./g, ',');
+      firebase.database().ref(`emailToUid/${emailWithCommas}`).once('value').then(function(snapshot){
+        if (snapshot.val()){
+          var clickedStudentUid = snapshot.val();
+          firebase.database().ref(`student/${clickedStudentUid}/assignment/${assignmentId}`).once('value').then(function(snapshot){
+            if (snapshot.val()) {
+              firebase.database().ref(`student/${clickedStudentUid}/assignment/${assignmentId}`).remove().then(function(snapshot){
+                console.log("successful removed #1 ", assignmentId);
+              });
+            }
+          });
+        }
+      });
+      firebase.database().ref(`assignment/${assignmentId}`).remove().then(function (snapshot) {
+        console.log("successful removed #2 ", assignmentId);
+      });
+    }
   }
 
   render() {
     const {live_assignments, user_cred} = this.props;
-    const {column, direction} = this.state;
+    const {column, direction, more_details, magnify_student, 
+      magnify_assessmentID,
+      magnify_flac, 
+      magnify_transcribedText} = this.state;
 
     return (
       <Segment vertical>
-        <Grid>
+        <Grid stackable>
           <Grid.Row>
             <Grid.Column width={11}>
               <AssignAssessment/>
@@ -146,8 +182,8 @@ class TeacherDashboard extends React.Component {
                 <Table.Header>
                   <Table.Row>
                     <Table.HeaderCell sorted={column === 'name' ? direction : null} onClick={()=>{this.handleSort('name')}}>Student</Table.HeaderCell>
-                    <Table.HeaderCell sorted={column === 'assessment' ? direction : null} onClick={()=>{this.handleSort('assessment')}}>Assessment</Table.HeaderCell>
                     <Table.HeaderCell sorted={column === 'status' ? direction : null} onClick={()=>{this.handleSort('status')}}>Status</Table.HeaderCell>
+                    <Table.HeaderCell>Time</Table.HeaderCell>
                     <Table.HeaderCell sorted={column === 'score' ? direction : null} onClick={()=>{this.handleSort('score')}}>Raw Score</Table.HeaderCell>
                     <Table.HeaderCell>Recording</Table.HeaderCell>
                     <Table.HeaderCell>Delete</Table.HeaderCell>
@@ -156,14 +192,35 @@ class TeacherDashboard extends React.Component {
 
                 <Table.Body>
                   {live_assignments.map((assignment, key)=>{
+                    // console.log(assignment);
                     return (
                       <Table.Row key={key}>
                         <Table.Cell>{assignment.name}</Table.Cell>
-                        <Table.Cell>{assignment.assessment}</Table.Cell>
                         <Table.Cell>{assignment.status}</Table.Cell>
-                        <Table.Cell>{assignment.score}</Table.Cell>
-                        <Table.Cell>{assignment.flac}</Table.Cell>
-                        <Table.Cell textAlign="center"><Icon onClick={()=>{this.handleDelete(assignment.assignmentId, assignment.email)}} name="window close"/></Table.Cell>
+                        <Table.Cell>
+                          {assignment.strDate}
+                          <Divider/>
+                          {(assignment.numOfRecordingSeconds)?`${new Number(assignment.numOfRecordingSeconds).toFixed(0)} Seconds`:null}
+                          <Divider/>
+                          {(assignment.wordsPerMinute)?<strong>{assignment.wordsPerMinute} WPM</strong>:null}
+                        </Table.Cell>
+                        <Table.Cell>
+                          {(assignment.score)?(
+                            <span>{new Number(assignment.score*100).toFixed(0).toString() + '%'}</span>
+                          ):null}
+                          {(assignment.score<.40 && assignment.score)?(
+                            <span>
+                              <Divider/>
+                              High chance assignment is unfinished.
+                            </span>
+                          ):null}
+                        </Table.Cell>
+                        <Table.Cell>
+                          <Button icon='folder open outline' fluid onClick={()=>{this.ViewMoreDetails(assignment.name, assignment.assessment, assignment.flac, assignment.transcribedText)}}/>
+                        </Table.Cell>
+                        <Table.Cell textAlign="center">
+                          <Button icon='delete' fluid color='red' onClick={()=>{this.handleDelete(assignment.assignmentId, assignment.email)}}/>
+                          </Table.Cell>
                       </Table.Row>
                     )
                   })}
@@ -175,6 +232,17 @@ class TeacherDashboard extends React.Component {
             </Grid.Column>
           </Grid.Row>
         </Grid>
+        <Modal open={more_details} onClose={this.resetModal} closeIcon>
+          <Modal.Header>{magnify_student}</Modal.Header>
+          <Modal.Content>
+            <Modal.Description>
+              <Header>Assessment: {magnify_assessmentID}</Header>
+              <p>{magnify_flac}</p>
+              <p><strong>Transcribed Text</strong></p>
+              <p>{magnify_transcribedText}</p>
+            </Modal.Description>
+          </Modal.Content>
+        </Modal>
       </Segment>
     )
   }
