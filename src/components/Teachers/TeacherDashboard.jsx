@@ -60,6 +60,15 @@ class TeacherDashboard extends React.Component {
             var score = (results)?results.scoreFromCompareWord:null;
             var flacFile = (results)?results.publicFlacURL:null;
             var wordsPerMinute = (results)?results.transcribedWordsPerMinute:null;
+            var numOfRecordingSeconds = (results)?results.numOfRecordingSeconds:null;
+            var timeStamp = (results)?results.timeStamp:null;
+            var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            var strDate = null;
+            if (timeStamp) {
+              timeStamp = Number(timeStamp);
+              var date = new Date(timeStamp);
+              strDate = months[date.getMonth()] +'-'+ date.getDay() + ' ' + date.getHours() + ':' + date.getMinutes();
+            }
             var obj = {
               assignmentId,
               email: assignment.val().studentInfo.emailAddress,
@@ -68,7 +77,10 @@ class TeacherDashboard extends React.Component {
               status: (results)?results.status:'Have not started',
               score: (score !== undefined && score !== null)?(<span>{new Number(score*100).toFixed(0).toString() + '%'}</span>):null,
               flac: (flacFile)?(<audio controls preload='auto'><source src={flacFile} type="audio/flac"/></audio>):null,
-              wordsPerMinute: (wordsPerMinute !== undefined && wordsPerMinute !== null)?wordsPerMinute:null
+              wordsPerMinute: (wordsPerMinute !== undefined && wordsPerMinute !== null)?wordsPerMinute:null,
+              numOfRecordingSeconds: (numOfRecordingSeconds !== undefined && numOfRecordingSeconds !== null)?numOfRecordingSeconds:null,
+              timeStamp: (timeStamp !== undefined && timeStamp !== null)?timeStamp:null,
+              strDate: (strDate !== undefined && strDate !== null)?strDate:null
             }
             allLiveAssignments.push(obj);
           });
@@ -151,7 +163,7 @@ class TeacherDashboard extends React.Component {
                         <Table.Cell>{assignment.status}</Table.Cell>
                         <Table.Cell>{assignment.score}</Table.Cell>
                         <Table.Cell>{assignment.flac}</Table.Cell>
-                        <Table.Cell textAlign="center"><Icon onClick={this.handleDelete.bind(null, assignment.assignmentId, assignment.email)} name="window close"/></Table.Cell>
+                        <Table.Cell textAlign="center"><Icon onClick={()=>{this.handleDelete(assignment.assignmentId, assignment.email)}} name="window close"/></Table.Cell>
                       </Table.Row>
                     )
                   })}
