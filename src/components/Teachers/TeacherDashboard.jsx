@@ -44,6 +44,7 @@ class TeacherDashboard extends React.Component {
           if (!currentClassroom) {
             // does it resolve ONLY in the first classroom that it finds?
             currentClassroom = classes.val();
+            console.log(currentClassroom);
             resolve(currentClassroom);
             firebase.database().ref(`/classes/${currentClassroom}`).once('value').then(function(snapshot){
               if (snapshot.val()){
