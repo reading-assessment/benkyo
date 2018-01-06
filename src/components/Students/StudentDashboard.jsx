@@ -26,7 +26,7 @@ class StudentDashboard extends React.Component {
       current_assignment: null,
       current_assessment_text: null,
       current_assessment_image: null,
-      countdownSeconds: 1,
+      countdownSeconds: 5,
 
       introduction: true,
       prepartion: false,
@@ -45,7 +45,6 @@ class StudentDashboard extends React.Component {
 
   componentDidMount(){
     const{user_cred} = this.props;
-    console.log('mounting StudentDashboard', user_cred.uid);
     firebase.database().ref(`student/${user_cred.uid}`).once('value').then(function(snapshot){
       if (snapshot.val()){
         this.props.dispatch(SetCurrentProfile(snapshot.val().default_profile));
@@ -87,7 +86,6 @@ class StudentDashboard extends React.Component {
     const {profile, user_cred, enrolledClasses, all_assignments} = this.props;
     if (all_assignments.length>0){
       var active_assignment = all_assignments[0];
-      console.log(active_assignment);
       this.props.dispatch(SetActiveAssignment(active_assignment));
 
       firebase.database().ref(`assessments/${active_assignment.assessment}`).once('value')
@@ -95,9 +93,11 @@ class StudentDashboard extends React.Component {
         if (snapshot.val()){
           var text = snapshot.val().Text.long;
           var image = snapshot.val().meta.image_url;
+          var title = snapshot.val().meta.title;
           this.setState({
             current_assessment_text: text,
-            current_assessment_image: image
+            current_assessment_image: image,
+            current_assessment_title: title
           })
         }
       }.bind(this))
@@ -129,7 +129,7 @@ class StudentDashboard extends React.Component {
     var current = countdownSeconds;
     current--;
     this.setState({countdownSeconds: current});
-    if (countdownSeconds === 0) {
+    if (countdownSeconds === 1) {
       clearInterval(interval);
       this.setState({countdown_modal:false, open_assessment_modal: true});
     }
@@ -171,7 +171,7 @@ class StudentDashboard extends React.Component {
 
   render() {
     const {profile, user_cred, enrolledClasses, all_assignments, active_assignment} = this.props;
-    const {current_course, current_assignment, current_assessment, current_assessment_image, current_assessment_text, open_assessment_modal, introduction, prepartion, countdownSeconds, countdown_modal, finish_message} = this.state;
+    const {current_course, current_assignment, current_assessment, current_assessment_image, current_assessment_text, current_assessment_title, open_assessment_modal, introduction, prepartion, countdownSeconds, countdown_modal, finish_message} = this.state;
 
     if (profile.name) {
       var renderGreeting = (
@@ -182,6 +182,9 @@ class StudentDashboard extends React.Component {
       )
       var renderAssignmentImage = (
         <Image src={current_assessment_image} size='medium' centered/>
+      )
+      var personalizeFinalMessage = (
+        <Header as='h2'>Hey {profile.name.givenName}.<br/></Header>
       )
     }
 
@@ -270,7 +273,7 @@ class StudentDashboard extends React.Component {
                     <Button.Group size='big'>
                       <Button positive onClick={this.prepare_mindset}>Yes</Button>
                       <Button.Or />
-                      <Button onClick={this.logout}>No</Button>
+                      <Button onClick={this.logout}>Log Out</Button>
                     </Button.Group>
                   </Header>
                 </Grid.Column>
@@ -301,7 +304,7 @@ class StudentDashboard extends React.Component {
             <Grid textAlign='center'>
               <Grid.Row style={{height: '95vh'}}>
                 <Grid.Column verticalAlign='middle'>
-                  <Header as='h2'>
+                  <Header as='h1' style={{fontSize: '10em'}}>
                     {countdownSeconds}
                   </Header>
                 </Grid.Column>
@@ -310,14 +313,13 @@ class StudentDashboard extends React.Component {
           </Modal.Content>
         </Modal>
         <Modal size='fullscreen' open={open_assessment_modal} style={{height: '97vh'}}>
-          <Modal.Header>Course: {(active_assignment)?active_assignment.courseID:null}</Modal.Header>
           <Modal.Content>
             <Modal.Description>
-              <Header>Assignment: {(active_assignment)?active_assignment.assignmentID:null}</Header>
+              <Header>{current_assessment_title}</Header>
               <Item.Group>
                 <Item>
                   <Item.Image src={current_assessment_image}/>
-                  <Item.Content verticalAlign='middle'>
+                  <Item.Content verticalAlign='middle' style={{lineHeight: '1.5em', fontSize: '1.4em'}}>
                     {htmlToText.fromString(current_assessment_text)}
                   </Item.Content>
                 </Item>
@@ -332,7 +334,14 @@ class StudentDashboard extends React.Component {
             <Grid textAlign='center'>
               <Grid.Row style={{height: '95vh'}}>
                 <Grid.Column verticalAlign='middle'>
-                  Thanks for taking Benkyo Reading Assessment
+                  {personalizeFinalMessage}
+                  <br/>
+                  <Header as='h2'>
+                    Thanks for taking Benkyo Reading Assessment!
+                    <br/>
+                    <br/>
+                    <Button circular positive size='huge' onClick={this.logout}>Log out</Button>
+                  </Header>
                 </Grid.Column>
               </Grid.Row>
             </Grid>

@@ -45,21 +45,15 @@ class AssessmentRecording extends React.Component{
   startRecording() {
     const {audioContext} = this.state;
     const {user_cred, assignmentId, assessmentId, classroomId} = this.props;
-    console.log(user_cred.uid, assignmentId, assessmentId, classroomId)
 
     firebase.database().ref(`student/${user_cred.uid}/assignment/${assignmentId}`).update({status:'started'});
     firebase.database().ref(`assignment/${assignmentId}/results`).update({status:'started'});
 
-    console.log(navigator);
-    console.log(navigator.mediaDevices);
-    console.log(navigator.mediaDevices.getUserMedia);
-    
     var constraints = {audio:true, video:false};
     // Access the Microphone using the navigator.mediaDevices.getUserMedia method to obtain a stream, HMTL5
-    console.log(constraints)
-    navigator.mediaDevices.getUserMedia(constraints)
-    .then(function(stream){
-      console.log('started recording');
+    var promise = navigator.mediaDevices.getUserMedia(constraints);
+    
+    promise.then(function(stream){
       window.audio_stream = stream;
       // Create the MediaStreamSource for the Recorder library
       window.input = audioContext.createMediaStreamSource(stream);
@@ -166,7 +160,7 @@ class AssessmentRecording extends React.Component{
       var uploadTask = audioRef.put(blob);
       uploadTask.on('state_changed', function(snapshot){
         var progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-        console.log('Upload is ' + progress + '% done');
+        // console.log('Upload is ' + progress + '% done');
         this.setState({percentComplete: progress});
       }.bind(this), function (error){
 
@@ -175,7 +169,7 @@ class AssessmentRecording extends React.Component{
         var fileNameWAV = filePrefix + '.wav';
         var downloadURL = uploadTask.snapshot.downloadURL;
         this.cleanAudioBlob(blob, downloadURL, filePrefix);
-        console.log('Uploaded a blob', downloadURL);
+        // console.log('Uploaded a blob', downloadURL);
         const {audioContext} = this.state;
         // var frameCount = audioContext.sampleRate * 2.0;
         // var myArrayBuffer = audioContext.createBuffer(2, frameCount, audioContext.sampleRate);
@@ -192,13 +186,11 @@ class AssessmentRecording extends React.Component{
     return (
       <Container>
         <Button.Group labeled icon fluid>
-        <Button disabled={recording_started} onClick={this.startRecording} icon='unmute' content='Start Recording' color='green'/>
-          
           <Button disabled={!recording_started} onClick={this.stopRecording} icon='stop' content='Stop recording' color='red'/>
         </Button.Group>
-
-        <Header as='h2'>Stored Recordings</Header>
-        <ol id="recordingslist"></ol>
+        <ol id="recordingslist" style={{display: 'none'}}></ol>
+        <br/>
+        <br/>
         <Progress percent={Math.floor(percentComplete)} indicating progress='percent'>{(finishedRecording)?('Upload Completed! =D'):null}</Progress>
       </Container>
     )

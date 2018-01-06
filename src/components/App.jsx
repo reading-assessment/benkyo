@@ -50,7 +50,6 @@ export default class App extends React.Component {
               this.props.dispatch(SetMainRole('Select_Role')) //<=====
             }
 
-            console.log(snapshot.val().primary);
             // if the primary role is student, as we get it from firebase
             if (snapshot.val().primary === 'Student'){
               // go to the "classes" node, get all the classes
@@ -96,7 +95,6 @@ export default class App extends React.Component {
   render() {
     // get values from the APP state
     const { user_cred, change_main_view, role } = this.props;
-    console.log(change_main_view, role);
     // if no user is signed in
     if (change_main_view === 'Login' && role === 'Teacher') {
         var renderLogin = (
