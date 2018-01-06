@@ -26,16 +26,20 @@ class StudentDashboard extends React.Component {
       current_assignment: null,
       current_assessment_text: null,
       current_assessment_image: null,
-      open_assessment_modal: false,
+      countdownSeconds: 1,
+
       introduction: true,
-      prepartion: false
+      prepartion: false,
+      countdown_modal: false,
+      open_assessment_modal: false,
+      finish_message: false
     }
     this.StartAssessment = this.StartAssessment.bind(this);
     this.CloseAssessment = this.CloseAssessment.bind(this);
     this.prepare_mindset = this.prepare_mindset.bind(this);
     this.proceed_assignment = this.proceed_assignment.bind(this);
     this.logout = this.logout.bind(this);
-    this.startCountdown = this.startCountdown.bind(this);
+    this.start_countdown = this.start_countdown.bind(this);
     this.countdown = this.countdown.bind(this);
   }
 
@@ -106,26 +110,28 @@ class StudentDashboard extends React.Component {
     firebase.database().ref(`student/${user_cred.uid}/assignment/${active_assignment.assignmentID}`).update({status:'initiated'})
     firebase.database().ref(`assignment/${active_assignment.assignmentID}/results`).update({status:'initiated'})
     this.setState({
-      open_assessment_modal:true,
+      countdown_modal:true,
       current_course: active_assignment.courseID,
       current_assessment: active_assignment.assessment,
       current_assignment: active_assignment.assignmentID
     })
   }
 
-  startCountdown() {
-    this.setState({countdownSeconds: 10});
-    var interval= setInterval(this.countdown, 1000);
+  start_countdown() {
+    this.setState({prepartion: false, countdown_modal:true});
+    const {countdownSeconds} = this.state;
+    var interval= setInterval(this.countdown.bind(this), 1000);
     this.setState({interval: interval});
   }
 
   countdown() {
-    var current = this.state.countdownSeconds;
+    const {countdownSeconds, interval} = this.state;
+    var current = countdownSeconds;
     current--;
     this.setState({countdownSeconds: current});
-    if (this.state.countdownSeconds === 0) {
-      clearInterval(this.state.interval);
-      this.closeStartCountdownModal();
+    if (countdownSeconds === 0) {
+      clearInterval(interval);
+      this.setState({countdown_modal:false, open_assessment_modal: true});
     }
   }
 
@@ -158,13 +164,14 @@ class StudentDashboard extends React.Component {
       current_assignment: null,
       current_assessment_text: null,
       current_assessment_image: null,
-      open_assessment_modal: false
+      open_assessment_modal: false,
+      finish_message: true
     })
   }
 
   render() {
     const {profile, user_cred, enrolledClasses, all_assignments, active_assignment} = this.props;
-    const {current_course, current_assignment, current_assessment, current_assessment_image, current_assessment_text, open_assessment_modal, introduction, prepartion} = this.state;
+    const {current_course, current_assignment, current_assessment, current_assessment_image, current_assessment_text, open_assessment_modal, introduction, prepartion, countdownSeconds, countdown_modal, finish_message} = this.state;
 
     if (profile.name) {
       var renderGreeting = (
@@ -174,7 +181,7 @@ class StudentDashboard extends React.Component {
         <Header as='h2'>{profile.name.givenName}, you are going to take an assessment about<br/></Header>
       )
       var renderAssignmentImage = (
-        <Image src={current_assessment_image}/>
+        <Image src={current_assessment_image} size='medium' centered/>
       )
     }
 
@@ -250,24 +257,6 @@ class StudentDashboard extends React.Component {
             }.bind(this))}
           </Table.Body>
         </Table>
-        <Modal size='fullscreen' open={open_assessment_modal} onClose={this.CloseAssessment} closeIcon>
-          <Modal.Header>Course: {current_course}</Modal.Header>
-          <Modal.Content>
-            <Modal.Description>
-              <Header>Assignment: {current_assignment}</Header>
-              <Item.Group>
-                <Item>
-                  <Item.Image src={current_assessment_image} />
-                  <Item.Content verticalAlign='middle'>
-                    {htmlToText.fromString(current_assessment_text)}
-                  </Item.Content>
-                </Item>
-              </Item.Group>
-              <Divider />
-              <AssessmentRecording classroomId={current_course} assessmentId={current_assessment} assignmentId={current_assignment}/>
-            </Modal.Description>
-          </Modal.Content>
-        </Modal>
         <Modal size='fullscreen' open={introduction} style={{height: '97vh'}}>
           <Modal.Content>
             <Grid textAlign='center'>
@@ -300,8 +289,50 @@ class StudentDashboard extends React.Component {
                     Are you ready to begin?
                     <br/>
                     <br/>
-                    <Button circular positive size='huge' onClick={this.proceed_assignment}>Start</Button>
+                    <Button circular positive size='huge' onClick={this.start_countdown}>Start</Button>
                   </Header>
+                </Grid.Column>
+              </Grid.Row>
+            </Grid>
+          </Modal.Content>
+        </Modal>
+        <Modal size='fullscreen' open={countdown_modal} style={{height: '97vh'}}>
+          <Modal.Content>
+            <Grid textAlign='center'>
+              <Grid.Row style={{height: '95vh'}}>
+                <Grid.Column verticalAlign='middle'>
+                  <Header as='h2'>
+                    {countdownSeconds}
+                  </Header>
+                </Grid.Column>
+              </Grid.Row>
+            </Grid>
+          </Modal.Content>
+        </Modal>
+        <Modal size='fullscreen' open={open_assessment_modal} style={{height: '97vh'}}>
+          <Modal.Header>Course: {(active_assignment)?active_assignment.courseID:null}</Modal.Header>
+          <Modal.Content>
+            <Modal.Description>
+              <Header>Assignment: {(active_assignment)?active_assignment.assignmentID:null}</Header>
+              <Item.Group>
+                <Item>
+                  <Item.Image src={current_assessment_image}/>
+                  <Item.Content verticalAlign='middle'>
+                    {htmlToText.fromString(current_assessment_text)}
+                  </Item.Content>
+                </Item>
+              </Item.Group>
+              <Divider />
+              <AssessmentRecording CloseAssessment={this.CloseAssessment}/>
+            </Modal.Description>
+          </Modal.Content>
+        </Modal>
+        <Modal size='fullscreen' open={finish_message} style={{height: '97vh'}}>
+          <Modal.Content>
+            <Grid textAlign='center'>
+              <Grid.Row style={{height: '95vh'}}>
+                <Grid.Column verticalAlign='middle'>
+                  Thanks for taking Benkyo Reading Assessment
                 </Grid.Column>
               </Grid.Row>
             </Grid>
