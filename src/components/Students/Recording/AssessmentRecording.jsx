@@ -10,7 +10,10 @@ import Promise from 'bluebird';
 export default connect((store) => {
   return {
     user_cred: store.authentication.user_cred,
-    role: store.authentication.role
+    role: store.authentication.role,
+    assignmentId: store.student.active_assignment.assignmentID,
+    assessmentId: store.student.active_assignment.assessment,
+    classroomId: store.student.active_assignment.courseID
   }
 })(
 class AssessmentRecording extends React.Component{
@@ -22,17 +25,15 @@ class AssessmentRecording extends React.Component{
       input: null,
       recorder: null,
       percentComplete: 0,
-      finishedRecording: false,
-      openStartModal: false,
-      countdownSeconds: 10
+      finishedRecording: false
     }
     this.startRecording = this.startRecording.bind(this);
     this.stopRecording = this.stopRecording.bind(this);
     this.cleanAudioBlob = this.cleanAudioBlob.bind(this);
-    this.openStartCountdownModal = this.openStartCountdownModal.bind(this);
-    this.closeStartCountdownModal = this.closeStartCountdownModal.bind(this);
-    this.countdown = this.countdown.bind(this);
-    this.startCountdown = this.startCountdown.bind(this);
+  }
+
+  componentDidMount() {
+    this.startRecording();
   }
 
     /**
@@ -43,14 +44,22 @@ class AssessmentRecording extends React.Component{
     */
   startRecording() {
     const {audioContext} = this.state;
-    const {user_cred, assignmentId} = this.props;
+    const {user_cred, assignmentId, assessmentId, classroomId} = this.props;
+    console.log(user_cred.uid, assignmentId, assessmentId, classroomId)
 
-    firebase.database().ref(`student/${user_cred.uid}/assignment/${assignmentId}`).update({status:'started'})
-    firebase.database().ref(`assignment/${assignmentId}/results`).update({status:'started'})
+    firebase.database().ref(`student/${user_cred.uid}/assignment/${assignmentId}`).update({status:'started'});
+    firebase.database().ref(`assignment/${assignmentId}/results`).update({status:'started'});
+
+    console.log(navigator);
+    console.log(navigator.mediaDevices);
+    console.log(navigator.mediaDevices.getUserMedia);
+    
     var constraints = {audio:true, video:false};
     // Access the Microphone using the navigator.mediaDevices.getUserMedia method to obtain a stream, HMTL5
+    console.log(constraints)
     navigator.mediaDevices.getUserMedia(constraints)
     .then(function(stream){
+      console.log('started recording');
       window.audio_stream = stream;
       // Create the MediaStreamSource for the Recorder library
       window.input = audioContext.createMediaStreamSource(stream);
@@ -69,6 +78,7 @@ class AssessmentRecording extends React.Component{
     }.bind(this))
     .catch(function(err) {
       /* handle the error */
+      console.log(err);
     });
   }
 
@@ -100,6 +110,7 @@ class AssessmentRecording extends React.Component{
       if (confirmation) {
         socket.disconnect();
         this.setState({finishedRecording: true});
+        this.props.CloseAssessment();
       }
     });
     // ----------------JOHN CODE END--------------------------
@@ -176,54 +187,19 @@ class AssessmentRecording extends React.Component{
     }.bind(this), ("audio/mpeg" || "audio/wav"));
   }
 
-
-  startCountdown() {
-    this.setState({countdownSeconds: 10});
-    var interval= setInterval(this.countdown.bind(this), 1000);
-    this.setState({interval: interval});
-  }
-
-  countdown() {
-    var current = this.state.countdownSeconds;
-    current--;
-    this.setState({countdownSeconds: current});
-    if (this.state.countdownSeconds === 0) {
-      clearInterval(this.state.interval);
-      this.closeStartCountdownModal();
-    }
-  }
-
-  openStartCountdownModal() {
-    this.setState({openStartModal: true});
-    this.startCountdown();
-  }
-
-  closeStartCountdownModal() {
-    this.setState({openStartModal: false});
-    this.startRecording();
-  }
-
   render() {
-    const {recording_started, percentComplete, finishedRecording, countdownSeconds} = this.state;
+    const {recording_started, percentComplete, finishedRecording} = this.state;
     return (
       <Container>
         <Button.Group labeled icon fluid>
-          <Button disabled={recording_started} onClick={this.openStartCountdownModal} icon='unmute' content='Start Recording' color='green'/>
+        <Button disabled={recording_started} onClick={this.startRecording} icon='unmute' content='Start Recording' color='green'/>
+          
           <Button disabled={!recording_started} onClick={this.stopRecording} icon='stop' content='Stop recording' color='red'/>
         </Button.Group>
 
         <Header as='h2'>Stored Recordings</Header>
         <ol id="recordingslist"></ol>
         <Progress percent={Math.floor(percentComplete)} indicating progress='percent'>{(finishedRecording)?('Upload Completed! =D'):null}</Progress>
-        <Modal size='large' open={this.state.openStartModal}>
-          <Modal.Header>
-            <Container textAlign='center'>
-                Get Ready! Your assessment will start in
-              <Divider/>
-              <Header as='h1' color='red' textAlign='center'> {countdownSeconds}</Header>
-            </Container>
-          </Modal.Header>
-        </Modal>
       </Container>
     )
   }
