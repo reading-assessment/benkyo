@@ -27,6 +27,8 @@ class StudentDashboard extends React.Component {
       current_assessment_text: null,
       current_assessment_image: null,
       countdownSeconds: 5,
+      all_celebration: null,
+      randomIndex: 0,
 
       introduction: true,
       prepartion: false,
@@ -69,6 +71,15 @@ class StudentDashboard extends React.Component {
         }.bind(this))
       }
     }.bind(this));
+    firebase.database().ref(`celebration`).once('value').then(function(snapshot){
+      if (snapshot.val()) {
+        var giphyArr = [];
+        snapshot.forEach(function(giphy){
+          giphyArr.push(giphy.val());
+        })
+        this.setState({all_celebration: giphyArr, randomIndex: Math.floor(Math.random() * giphyArr.length) + 1});
+      }
+    }.bind(this))
   }
 
   logout() {
@@ -171,7 +182,7 @@ class StudentDashboard extends React.Component {
 
   render() {
     const {profile, user_cred, enrolledClasses, all_assignments, active_assignment} = this.props;
-    const {current_course, current_assignment, current_assessment, current_assessment_image, current_assessment_text, current_assessment_title, open_assessment_modal, introduction, prepartion, countdownSeconds, countdown_modal, finish_message} = this.state;
+    const {current_course, current_assignment, current_assessment, current_assessment_image, current_assessment_text, current_assessment_title, open_assessment_modal, introduction, prepartion, countdownSeconds, countdown_modal, finish_message, all_celebration, randomIndex} = this.state;
 
     if (profile.name) {
       var renderGreeting = (
@@ -186,6 +197,11 @@ class StudentDashboard extends React.Component {
       var personalizeFinalMessage = (
         <Header as='h2'>Hey {profile.name.givenName}.<br/></Header>
       )
+      if(all_celebration){
+        var renderCelebrationImage = (
+          <Image src={all_celebration[randomIndex]} size='medium' centered/>
+        )
+      }
     }
 
     return (
@@ -335,6 +351,8 @@ class StudentDashboard extends React.Component {
               <Grid.Row style={{height: '95vh'}}>
                 <Grid.Column verticalAlign='middle'>
                   {personalizeFinalMessage}
+                  <br/>
+                  {renderCelebrationImage}
                   <br/>
                   <Header as='h2'>
                     Thanks for taking Benkyo Reading Assessment!

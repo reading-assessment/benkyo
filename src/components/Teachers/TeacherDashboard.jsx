@@ -30,7 +30,7 @@ class TeacherDashboard extends React.Component {
 
   componentDidMount() {
     const{user_cred, classrooms} = this.props;
-    firebase.database().ref(`assessments`).once('value').then(function(snapshot){
+    firebase.database().ref(`assessments`).orderByKey().once('value').then(function(snapshot){
       this.props.dispatch(StoreAllAssessments(snapshot.val()))
     }.bind(this))
     new Promise (function(resolve, reject){
@@ -57,12 +57,12 @@ class TeacherDashboard extends React.Component {
       }.bind(this))
     }.bind(this))
     .then(function(currentClassroom){
-      firebase.database().ref(`assignment`).orderByChild('courseID').equalTo(currentClassroom).once('value')
+      // firebase.database().ref(`assignment`).orderByChild('courseID').equalTo(currentClassroom).once('value')
+      firebase.database().ref(`assignment`).once('value')
       .then(function(snapshot){
         if (snapshot.val()) {
           var allLiveAssignments = [];
           snapshot.forEach(function(assignment){
-            console.log(assignment.val());
             var assignmentId = assignment.key;
             var results = assignment.val().results;
             var score = (results)?results.scoreFromCompareWord:null;
