@@ -50,7 +50,7 @@ class AssignAssessment extends React.Component{
         for (var assessment in all_assessments){
           if (all_assessments[assessment].meta.id){
             var obj = {
-              text: all_assessments[assessment].meta.id,
+              text: `${all_assessments[assessment].meta.id} - ${all_assessments[assessment].meta.title}`,
               value: all_assessments[assessment].meta.id,
               key: assessment
             }
