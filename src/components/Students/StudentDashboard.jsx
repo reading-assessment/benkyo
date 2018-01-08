@@ -26,6 +26,7 @@ class StudentDashboard extends React.Component {
       current_assignment: null,
       current_assessment_text: null,
       current_assessment_image: null,
+      current_assessment_intro: null,
       countdownSeconds: 5,
       all_celebration: null,
       randomIndex: 0,
@@ -105,10 +106,12 @@ class StudentDashboard extends React.Component {
           var text = snapshot.val().Text.long;
           var image = snapshot.val().meta.image_url;
           var title = snapshot.val().meta.title;
+          var intro = snapshot.val().meta.intro;
           this.setState({
             current_assessment_text: text,
             current_assessment_image: image,
-            current_assessment_title: title
+            current_assessment_title: title,
+            current_assessment_intro: intro
           })
         }
       }.bind(this))
@@ -182,7 +185,7 @@ class StudentDashboard extends React.Component {
 
   render() {
     const {profile, user_cred, enrolledClasses, all_assignments, active_assignment} = this.props;
-    const {current_course, current_assignment, current_assessment, current_assessment_image, current_assessment_text, current_assessment_title, open_assessment_modal, introduction, prepartion, countdownSeconds, countdown_modal, finish_message, all_celebration, randomIndex} = this.state;
+    const {current_course, current_assignment, current_assessment, current_assessment_image, current_assessment_text, current_assessment_title, current_assessment_intro, open_assessment_modal, introduction, prepartion, countdownSeconds, countdown_modal, finish_message, all_celebration, randomIndex} = this.state;
 
     if (profile.name) {
       var renderGreeting = (
@@ -303,13 +306,10 @@ class StudentDashboard extends React.Component {
               <Grid.Row style={{height: '95vh'}}>
                 <Grid.Column verticalAlign='middle'>
                   {renderPreparation}
+                  {(current_assessment_intro)?(<Header as='h2'>{current_assessment_intro}<br/><br/></Header>):null}
                   {renderAssignmentImage}
-                  <Header as='h2'>
-                    Are you ready to begin?
-                    <br/>
-                    <br/>
-                    <Button circular positive size='huge' onClick={this.start_countdown}>Start</Button>
-                  </Header>
+                  <Header as='h2'><br/>Are you ready to begin?<br/></Header>
+                  <Button circular positive size='huge' onClick={this.start_countdown}>Start</Button>
                 </Grid.Column>
               </Grid.Row>
             </Grid>
