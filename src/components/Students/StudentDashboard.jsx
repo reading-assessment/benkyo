@@ -78,7 +78,7 @@ class StudentDashboard extends React.Component {
         snapshot.forEach(function(giphy){
           giphyArr.push(giphy.val());
         })
-        this.setState({all_celebration: giphyArr, randomIndex: Math.floor(Math.random() * giphyArr.length) + 1});
+        this.setState({all_celebration: giphyArr, randomIndex: Math.floor(Math.random() * giphyArr.length)});
       }
     }.bind(this))
   }
