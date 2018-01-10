@@ -186,32 +186,34 @@ class StudentDashboard extends React.Component {
   render() {
     const {profile, user_cred, enrolledClasses, all_assignments, active_assignment} = this.props;
     const {current_course, current_assignment, current_assessment, current_assessment_image, current_assessment_text, current_assessment_title, current_assessment_intro, open_assessment_modal, introduction, prepartion, countdownSeconds, countdown_modal, finish_message, all_celebration, randomIndex} = this.state;
-
-    if (profile.name) {
-      var renderGreeting = (
-        <Header as='h2'>Hello! You are logged in as {profile.name.fullName}<br/></Header>
-      )
-      var renderPreparation = (
-        <Header as='h2'>{profile.name.givenName}, you are going to take an assessment about<br/></Header>
-      )
-      var renderAssignmentImage = (
-        <Image src={current_assessment_image} size='medium' centered/>
-      )
-      var personalizeFinalMessage = (
-        <Header as='h2'>Hey {profile.name.givenName}.<br/></Header>
-      )
-      if(all_celebration){
-        var renderCelebrationImage = (
-          <Image src={all_celebration[randomIndex]} size='medium' centered/>
+    if (profile){
+      if (profile.name) {
+        var renderGreetingHeader = (
+          <Header as='h2'>Hi {(profile.name)?profile.name.givenName:null}!  Welcome to Benkyo Reading!</Header>
         )
+        var renderGreeting = (
+          <Header as='h2'>Hello! You are logged in as {profile.name.fullName}<br/></Header>
+        )
+        var renderPreparation = (
+          <Header as='h2'>{profile.name.givenName}, you are going to take an assessment about<br/></Header>
+        )
+        var renderAssignmentImage = (
+          <Image src={current_assessment_image} size='medium' centered/>
+        )
+        var personalizeFinalMessage = (
+          <Header as='h2'>Hey {profile.name.givenName}.<br/></Header>
+        )
+        if(all_celebration){
+          var renderCelebrationImage = (
+            <Image src={all_celebration[randomIndex]} size='medium' centered/>
+          )
+        }
       }
     }
 
     return (
       <Segment vertical>
-        <Header as='h2'>
-          Hi {(profile.name)?profile.name.givenName:null}!  Welcome to Benkyo Reading!
-        </Header>
+        {renderGreetingHeader}
         <Header as='h4'>
           If any of your teachers have assigned you a reading assessment, please click 'Begin Assessment' to start your reading assessment.
           After you begin:
