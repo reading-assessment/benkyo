@@ -67,7 +67,7 @@ class StudentDashboard extends React.Component {
               var results = each_assignment.val().results;
               var IS_DONE = false;
               if (results !== undefined) {
-                if (results.status !== 'done') {
+                if (results.status === 'done') {
                   IS_DONE = true;
                 }
               }
