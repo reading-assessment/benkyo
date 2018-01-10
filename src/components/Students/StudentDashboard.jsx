@@ -32,6 +32,7 @@ class StudentDashboard extends React.Component {
       randomIndex: 0,
 
       introduction: true,
+      no_assignment: false,
       prepartion: false,
       countdown_modal: false,
       open_assessment_modal: false,
@@ -63,9 +64,18 @@ class StudentDashboard extends React.Component {
           var all_assignments = [];
           assignment_snap.forEach(function(each_assignment){
             if(ids.indexOf(each_assignment.val().studentID)>-1){
-              var obj = each_assignment.val();
-              obj.assignmentID = each_assignment.key;
-              all_assignments.push(obj);
+              var results = each_assignment.val().results;
+              var IS_DONE = false;
+              if (results !== undefined) {
+                if (results.status !== 'done') {
+                  IS_DONE = true;
+                }
+              }
+              if (!IS_DONE){
+                var obj = each_assignment.val();
+                obj.assignmentID = each_assignment.key;
+                all_assignments.push(obj);
+              }
             }
           })
           this.props.dispatch(SetAllAssigments(all_assignments));
@@ -116,6 +126,8 @@ class StudentDashboard extends React.Component {
         }
       }.bind(this))
       this.setState({introduction:false, prepartion:true})
+    } else {
+      this.setState({introduction:false, no_assignment:true})
     }
   }
 
@@ -185,7 +197,7 @@ class StudentDashboard extends React.Component {
 
   render() {
     const {profile, user_cred, enrolledClasses, all_assignments, active_assignment} = this.props;
-    const {current_course, current_assignment, current_assessment, current_assessment_image, current_assessment_text, current_assessment_title, current_assessment_intro, open_assessment_modal, introduction, prepartion, countdownSeconds, countdown_modal, finish_message, all_celebration, randomIndex} = this.state;
+    const {current_course, current_assignment, current_assessment, current_assessment_image, current_assessment_text, current_assessment_title, current_assessment_intro, open_assessment_modal, introduction, no_assignment, prepartion, countdownSeconds, countdown_modal, finish_message, all_celebration, randomIndex} = this.state;
     if (profile){
       if (profile.name) {
         var renderGreetingHeader = (
@@ -297,6 +309,22 @@ class StudentDashboard extends React.Component {
                       <Button onClick={this.logout}>Log Out</Button>
                     </Button.Group>
                   </Header>
+                </Grid.Column>
+              </Grid.Row>
+            </Grid>
+          </Modal.Content>
+        </Modal>
+        <Modal size='fullscreen' open={no_assignment} style={{height: '97vh'}}>
+          <Modal.Content>
+            <Grid textAlign='center'>
+              <Grid.Row style={{height: '95vh'}}>
+                <Grid.Column verticalAlign='middle'>
+                  <Header as='h2'>
+                    Sorry, you have no current reading assignments at this time.
+                    <br/>
+                    <br/>
+                  </Header>
+                  <Button size='big' onClick={this.logout}>Log Out</Button>
                 </Grid.Column>
               </Grid.Row>
             </Grid>
