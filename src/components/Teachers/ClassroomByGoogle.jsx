@@ -3,6 +3,7 @@ import { connect } from 'react-redux';
 import axios from 'axios';
 import { SetAllClassrooms, SetCurrentClassrooms, SetTargetStudent, ResetSelectAssessment } from './TeacherActions'
 import Promise from 'bluebird'
+import _ from 'lodash';
 
 /* @connect((store) => {
   return {
@@ -24,16 +25,11 @@ class ClassroomByGoogle extends React.Component {
   render() {
     const {classrooms, currentClassroom} = this.props;
     if (currentClassroom.students) {
-      var studentArray = [];
-      for (var student in currentClassroom.students) {
-        var obj = currentClassroom.students[student];
-        obj['descriptionHeading'] = currentClassroom.descriptionHeading;
-        studentArray.push(obj);
-      }
+      var sorted_student = _.sortBy(currentClassroom.students, [function(o) { return o.profile.name.fullName; }]);
 
       var renderStudents = (
         <Feed>
-          {studentArray.map(function(student, key){
+          {sorted_student.map(function(student, key){
             return(
               <Feed.Event as='a' onClick={()=>{this.props.dispatch(SetTargetStudent(student)); this.props.dispatch(ResetSelectAssessment())}}>
                 <Feed.Label image={student.profile.photoUrl} />

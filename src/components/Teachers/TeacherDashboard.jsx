@@ -6,6 +6,7 @@ import { SetAllClassrooms, SetCurrentClassrooms, StoreAllAssessments, SetAllLive
 import Promise from 'bluebird';
 import _ from 'lodash';
 import AssignAssessment from './AssignAssessment.jsx'
+import moment from 'moment'
 
 export default connect((store) => {
   return {
@@ -44,7 +45,7 @@ class TeacherDashboard extends React.Component {
           if (!currentClassroom) {
             // does it resolve ONLY in the first classroom that it finds?
             currentClassroom = classes.val();
-            console.log(currentClassroom);
+            // console.log(currentClassroom);
             resolve(currentClassroom);
             firebase.database().ref(`/classes/${currentClassroom}`).once('value').then(function(snapshot){
               if (snapshot.val()){
@@ -91,6 +92,11 @@ class TeacherDashboard extends React.Component {
               strDate: (strDate !== undefined && strDate !== null)?strDate:null,
               transcribedText: (assignment.val().results)?assignment.val().results.transcribedText:null
             }
+            if (results) {
+              if (results.scoreFromFuzzySet){
+                obj['scoreFromFuzzySet'] = results.scoreFromFuzzySet;
+              }
+            }
             allLiveAssignments.push(obj);
           });
           this.props.dispatch(SetAllLiveAssignments(allLiveAssignments));
@@ -100,7 +106,7 @@ class TeacherDashboard extends React.Component {
   }
 
   ViewMoreDetails(student, assessmentID, flac_info, transcribedText) {
-    console.log(assessmentID, flac_info, transcribedText);
+    // console.log(assessmentID, flac_info, transcribedText);
     this.setState({
       magnify_student: student,
       magnify_assessmentID: assessmentID,
@@ -153,14 +159,14 @@ class TeacherDashboard extends React.Component {
           firebase.database().ref(`student/${clickedStudentUid}/assignment/${assignmentId}`).once('value').then(function(snapshot){
             if (snapshot.val()) {
               firebase.database().ref(`student/${clickedStudentUid}/assignment/${assignmentId}`).remove().then(function(snapshot){
-                console.log("successful removed #1 ", assignmentId);
+                // console.log("successful removed #1 ", assignmentId);
               });
             }
           });
         }
       });
       firebase.database().ref(`assignment/${assignmentId}`).remove().then(function (snapshot) {
-        console.log("successful removed #2 ", assignmentId);
+        // console.log("successful removed #2 ", assignmentId);
       });
     }
   }
@@ -182,6 +188,7 @@ class TeacherDashboard extends React.Component {
                 <Table.Header>
                   <Table.Row>
                     <Table.HeaderCell sorted={column === 'name' ? direction : null} onClick={()=>{this.handleSort('name')}}>Student</Table.HeaderCell>
+                    <Table.HeaderCell sorted={column === 'assessment' ? direction : null} onClick={()=>{this.handleSort('assessment')}}>Assessment</Table.HeaderCell>
                     <Table.HeaderCell sorted={column === 'status' ? direction : null} onClick={()=>{this.handleSort('status')}}>Status</Table.HeaderCell>
                     <Table.HeaderCell>Time</Table.HeaderCell>
                     <Table.HeaderCell sorted={column === 'score' ? direction : null} onClick={()=>{this.handleSort('score')}}>Raw Score</Table.HeaderCell>
@@ -192,13 +199,21 @@ class TeacherDashboard extends React.Component {
 
                 <Table.Body>
                   {live_assignments.map((assignment, key)=>{
-                    // console.log(assignment);
+                    if (assignment.scoreFromFuzzySet) {
+                      var renderFuzzyScore = (
+                        <div>
+                          <Divider/>
+                          {new Number(assignment.scoreFromFuzzySet*100).toFixed(0).toString() + '%'}
+                        </div>
+                      )
+                    }
                     return (
                       <Table.Row key={key}>
                         <Table.Cell>{assignment.name}</Table.Cell>
+                        <Table.Cell>{assignment.assessment}</Table.Cell>
                         <Table.Cell>{assignment.status}</Table.Cell>
                         <Table.Cell>
-                          {assignment.strDate}
+                          {(assignment.timeStamp)?moment(assignment.timeStamp).format("ddd, MMM D, h:mm"):null}
                           <Divider/>
                           {(assignment.numOfRecordingSeconds)?`${new Number(assignment.numOfRecordingSeconds).toFixed(0)} Seconds`:null}
                           <Divider/>
@@ -208,6 +223,7 @@ class TeacherDashboard extends React.Component {
                           {(assignment.score)?(
                             <span>{new Number(assignment.score*100).toFixed(0).toString() + '%'}</span>
                           ):null}
+                          {renderFuzzyScore}
                           {(assignment.score<.40 && assignment.score)?(
                             <span>
                               <Divider/>
