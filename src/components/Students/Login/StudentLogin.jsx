@@ -3,7 +3,7 @@ import { Button, Form, Header, Message, Grid, Segment } from 'semantic-ui-react'
 import axios from 'axios'
 import { connect } from 'react-redux';
 import { SetAuthenticatedUID } from './StudentLoginActions'
-import { SetMainRole } from '../../AuthenticateActions'
+import { SetMainRole, SetUserCred } from '../../AuthenticateActions'
 
 export default connect((store) => {
   return {
@@ -28,12 +28,14 @@ class StudentLogin extends React.Component {
       var token = result.credential.accessToken;
       // The signed-in user info.
       var user = result.user;
+
       firebase.database().ref(`roles/${user.uid}`).once('value').then(function(snapshot){
         if (!snapshot.val()){
           firebase.database().ref(`roles/${user.uid}`).update({primary:'Student'})
         }
       })
       this.props.dispatch(SetMainRole('Student'));
+      this.props.resetAuthState(true);
       // ...
     }.bind(this)).catch(function(error) {
       // Handle Errors here.
