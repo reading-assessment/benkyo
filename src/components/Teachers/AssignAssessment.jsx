@@ -92,7 +92,9 @@ class AssignAssessment extends React.Component{
             <Card.Content>
               <Image floated='right' size='mini' src={current_target_student.profile.photoUrl} />
               <Card.Header>
-                {current_target_student.profile.name.fullName}
+                <Segment vertical style={{padding: '0px'}}>
+                  {current_target_student.profile.name.fullName}
+                </Segment>
               </Card.Header>
               <Card.Meta>
                 {current_target_student.profile.emailAddress}
@@ -110,7 +112,7 @@ class AssignAssessment extends React.Component{
     } else {
       var renderAssignment = (
         <Header as='h3'>
-          Click One of the Students to the Right to Assign an Assessment'
+          Click One of the Students to the Right to Assign an Assessment
         </Header>
       )
     }

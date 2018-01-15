@@ -1,5 +1,5 @@
 import React from 'react';
-import { Table, Checkbox, Button, Icon, Segment, Grid, Divider, Modal, Header } from 'semantic-ui-react';
+import { Table, Checkbox, Button, Icon, Segment, Grid, Divider, Modal, Header, Dimmer } from 'semantic-ui-react';
 import { connect } from 'react-redux';
 import axios from 'axios';
 import { SetAllClassrooms, SetCurrentClassrooms, StoreAllAssessments, SetAllLiveAssignments } from './TeacherActions'
@@ -21,7 +21,8 @@ class TeacherDashboard extends React.Component {
       more_details: false,
       magnify_assessmentID: null,
       magnify_flac: null,
-      magnify_transcribedText: null
+      magnify_transcribedText: null,
+      dimmer_active: true
     }
     this.handleSort = this.handleSort.bind(this)
     this.handleDelete = this.handleDelete.bind(this)
@@ -176,7 +177,8 @@ class TeacherDashboard extends React.Component {
     const {column, direction, more_details, magnify_student, 
       magnify_assessmentID,
       magnify_flac, 
-      magnify_transcribedText} = this.state;
+      magnify_transcribedText
+    } = this.state;
 
     return (
       <Segment vertical>
@@ -209,7 +211,11 @@ class TeacherDashboard extends React.Component {
                     }
                     return (
                       <Table.Row key={key}>
-                        <Table.Cell>{assignment.name}</Table.Cell>
+                        <Table.Cell>
+                          <Segment vertical style={{padding: '0px'}}>
+                            {assignment.name}
+                          </Segment>
+                        </Table.Cell>
                         <Table.Cell>{assignment.assessment}</Table.Cell>
                         <Table.Cell>{assignment.status}</Table.Cell>
                         <Table.Cell>
@@ -249,7 +255,11 @@ class TeacherDashboard extends React.Component {
           </Grid.Row>
         </Grid>
         <Modal open={more_details} onClose={this.resetModal} closeIcon>
-          <Modal.Header>{magnify_student}</Modal.Header>
+          <Modal.Header>
+            <Segment vertical style={{padding: '0px'}}>
+            {magnify_student}
+            </Segment>
+          </Modal.Header>
           <Modal.Content>
             <Modal.Description>
               <Header>Assessment: {magnify_assessmentID}</Header>
