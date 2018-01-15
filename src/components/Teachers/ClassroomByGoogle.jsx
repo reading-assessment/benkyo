@@ -1,4 +1,4 @@
-import { Card, Feed } from 'semantic-ui-react';
+import { Card, Feed, Dimmer, Segment, Button } from 'semantic-ui-react';
 import { connect } from 'react-redux';
 import axios from 'axios';
 import { SetAllClassrooms, SetCurrentClassrooms, SetTargetStudent, ResetSelectAssessment } from './TeacherActions'
@@ -18,23 +18,26 @@ import _ from 'lodash';
 class ClassroomByGoogle extends React.Component {
   constructor(props){
     super(props);
-    this.state = {
-    }
   }
 
   render() {
     const {classrooms, currentClassroom} = this.props;
     if (currentClassroom.students) {
       var sorted_student = _.sortBy(currentClassroom.students, [function(o) { return o.profile.name.fullName; }]);
-
       var renderStudents = (
         <Feed>
           {sorted_student.map(function(student, key){
+            var studentObj_withClassRoom = student;
+            studentObj_withClassRoom['descriptionHeading'] = currentClassroom.descriptionHeading;
             return(
-              <Feed.Event as='a' onClick={()=>{this.props.dispatch(SetTargetStudent(student)); this.props.dispatch(ResetSelectAssessment())}}>
+              <Feed.Event as='a' onClick={()=>{this.props.dispatch(SetTargetStudent(studentObj_withClassRoom)); this.props.dispatch(ResetSelectAssessment())}}>
                 <Feed.Label image={student.profile.photoUrl} />
                 <Feed.Content>
-                  <Feed.Date content={student.profile.name.fullName} />
+                  <Feed.Date>
+                    <Segment vertical style={{padding: '0px'}}>
+                    {student.profile.name.fullName}
+                    </Segment>
+                  </Feed.Date>
                   <Feed.Summary>
                     {student.profile.emailAddress}
                   </Feed.Summary>
