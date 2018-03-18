@@ -42,13 +42,13 @@ class AssessmentRecording extends React.Component{
     *
     * It only stops when the method stopRecording is triggered.
     */
-  startRecording() {
-    const {audioContext} = this.state;
-    const {user_cred, assignmentId, assessmentId, classroomId} = this.props;
+    startRecording() {
+      const {audioContext} = this.state;
+      const {user_cred, assignmentId, assessmentId, classroomId} = this.props;
 
     firebase.database().ref(`student/${user_cred.uid}/assignment/${assignmentId}`).update({status:'started'});
     firebase.database().ref(`assignment/${assignmentId}/results`).update({status:'started'});
-
+    
     var constraints = {audio:true, video:false};
     // Access the Microphone using the navigator.mediaDevices.getUserMedia method to obtain a stream, HMTL5
     var promise = navigator.mediaDevices.getUserMedia(constraints);
@@ -58,16 +58,16 @@ class AssessmentRecording extends React.Component{
       // Create the MediaStreamSource for the Recorder library
       window.input = audioContext.createMediaStreamSource(stream);
       // console.log('Media stream succesfully created');
-
+      
       // Initialize the Recorder Library (custom)
       window.recorder = new Recorder(window.input);
       // console.log('Recorder initialised');
-
+      
       // Start recording !
       window.recorder && window.recorder.record();
       // console.log('Recorder started');
       this.setState({recording_started: true});
-
+      
       // Disable Record button and enable stop button !
     }.bind(this))
     .catch(function(err) {
@@ -75,17 +75,17 @@ class AssessmentRecording extends React.Component{
       console.log(err);
     });
   }
-
+  
   /**
-  * Stops the recording process. The method expects a callback as first
-  * argument (function) executed once the AudioBlob is generated and it
-  * receives the same Blob as first argument. The second argument is
-  * optional and specifies the format to export the blob either wav or mp3
-  */
+   * Stops the recording process. The method expects a callback as first
+   * argument (function) executed once the AudioBlob is generated and it
+   * receives the same Blob as first argument. The second argument is
+   * optional and specifies the format to export the blob either wav or mp3
+   */
   cleanAudioBlob(blob, downloadURL, filePrefix) {
     // console.log('cleanAudioBlob')
     const {user_cred, classroomId, assessmentId, assignmentId} = this.props;
-
+    
     // ----------------JOHN CODE----------------------------
     // Sockets.io and socketio-stream code
     var URL_SERVER = window.s_mode.app_server;
@@ -128,10 +128,20 @@ class AssessmentRecording extends React.Component{
   }
 
   stopRecording(callback, AudioFormat) {
-    const {user_cred, classroomId, assessmentId, assignmentId} = this.props;
+    const { user_cred, classroomId, assessmentId, assignmentId, currentAssessmentText} = this.props; // currentAssessmentText passed down from StudentDashboard
 
-    firebase.database().ref(`student/${user_cred.uid}/assignment/${assignmentId}`).update({status:'uploading'})
-    firebase.database().ref(`assignment/${assignmentId}/results`).update({status:'uploading'})
+    
+    // ------ UPDATING FIREBASE ------ //
+
+    // this update persists
+    firebase.database().ref(`student/${user_cred.uid}/assignment/${assignmentId}`).update({ currentReadingLevel: assessmentId}); 
+
+    // updating default profile (only under student category)
+    firebase.database().ref(`student/${user_cred.uid}/default_profile`).update({ currentReadingLevel: assessmentId.substr(1,1)}); 
+
+    // this update is overwritten when results are sent (?)
+    firebase.database().ref(`assignment/${assignmentId}/results`).update({ status: 'uploading', currentAssessmentText, assessmentId})
+
 
     // Stop the recorder instance
     window.recorder && window.recorder.stop();

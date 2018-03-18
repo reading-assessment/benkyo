@@ -5,6 +5,9 @@ import { SetAllClassrooms, SetCurrentClassrooms, SetTargetStudent, ResetSelectAs
 import Promise from 'bluebird'
 import _ from 'lodash';
 
+import { Link, DirectLink, Element, Events, animateScroll as scroll, scrollSpy, scroller } from 'react-scroll'
+
+
 /* @connect((store) => {
   return {
     user_cred: store.authentication.user_cred,
@@ -18,7 +21,25 @@ import _ from 'lodash';
 class ClassroomByGoogle extends React.Component {
   constructor(props){
     super(props);
+
+    this.scrollToTop = this.scrollToTop.bind(this);
+
   }
+
+  scrollToTop(){
+    scroll.scrollToTop();
+  }
+
+  componentDidMount() {
+    Events.scrollEvent.register('begin', function () {
+      console.log("begin", arguments);
+    });
+    Events.scrollEvent.register('end', function () {
+      console.log("end", arguments);
+    });
+  }
+
+
 
   render() {
     const {classrooms, currentClassroom} = this.props;
@@ -30,7 +51,13 @@ class ClassroomByGoogle extends React.Component {
             var studentObj_withClassRoom = student;
             studentObj_withClassRoom['descriptionHeading'] = currentClassroom.descriptionHeading;
             return(
-              <Feed.Event as='a' onClick={()=>{this.props.dispatch(SetTargetStudent(studentObj_withClassRoom)); this.props.dispatch(ResetSelectAssessment())}}>
+
+             <Feed.Event as='a' onClick= {()=>{
+               this.props.dispatch(SetTargetStudent(studentObj_withClassRoom)); 
+               this.props.dispatch(ResetSelectAssessment());
+               this.scrollToTop();
+               }} >
+
                 <Feed.Label image={student.profile.photoUrl} />
                 <Feed.Content>
                   <Feed.Date>

@@ -37,7 +37,17 @@ export default connect((store) => {
         descriptionHeading: current_target_student.descriptionHeading //Name of the Class
       };
       firebase.database().ref(`assignment`).push(obj);
-      this.props.dispatch(AssignItinStone());
+      this.props.dispatch(AssignItinStone()); // this sets done_selecting to TRUE
+
+      // FIREBASE CALL HERE TO UPDATE NEW SETTLING
+      // LATER  move the assignment of students level to occur after the assessment has occurred.
+
+
+      // read the correct user
+      console.log("STONE--> ID: ", obj.studentID);
+      console.log("Info--> ", obj.studentInfo);
+      console.log("current_target_student-->", current_target_student)
+
     }
 
     render() {
