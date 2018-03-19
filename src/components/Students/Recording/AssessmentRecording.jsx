@@ -128,19 +128,38 @@ class AssessmentRecording extends React.Component{
   }
 
   stopRecording(callback, AudioFormat) {
-    const { user_cred, classroomId, assessmentId, assignmentId, currentAssessmentText} = this.props; // currentAssessmentText passed down from StudentDashboard
+    const { user_cred, classroomId, assessmentId, assignmentId, currentAssessmentText} = this.props; 
+    // currentAssessmentText passed down from StudentDashboard
 
     
-    // ------ UPDATING FIREBASE ------ //
+    // --------- UPDATING FIREBASE --------- //
 
-    // this update persists
-    firebase.database().ref(`student/${user_cred.uid}/assignment/${assignmentId}`).update({ currentReadingLevel: assessmentId}); 
+    
+    // originalTextObject will be structure later to be used in the manuel assessment node
+    const assessmentData = { 
+      assessmentId,
+      originalText: currentAssessmentText, 
+      originalTextObj: currentAssessmentText.split(" ") // temporarily an array, but later this will be an object
+    }
 
-    // updating default profile (only under student category)
-    firebase.database().ref(`student/${user_cred.uid}/default_profile`).update({ currentReadingLevel: assessmentId.substr(1,1)}); 
+    // STUDENT NODE
+    // 'academicRecord' subnode created/updated here just to test the code,later this would be updated based on some condition set by instructor. This likely overwritten on a Google Classroom resync
+    firebase.database().ref(`student/${user_cred.uid}/academicRecord/`).update({ currentReadingLevel: assessmentId.substr(1, 1)}); 
 
-    // this update is overwritten when results are sent (?)
-    firebase.database().ref(`assignment/${assignmentId}/results`).update({ status: 'uploading', currentAssessmentText, assessmentId})
+    firebase.database().ref(`student/${user_cred.uid}/assignment/${assignmentId}`).update(assessmentData); 
+
+ 
+
+    // ASSIGNMENT NODE
+    // "results" are overwritten when app-server makes firebase call
+    firebase.database().ref(`assignment/${assignmentId}/results`).update({ status: 'uploading'})
+
+    // adds assessment data
+    firebase.database().ref(`assignment/${assignmentId}/`).update(assessmentData) 
+
+    // adds 'gmail Uid" to which can be used when iterating over assignments to get student academicRecord
+    firebase.database().ref(`assignment/${assignmentId}/`).update({gmailUid: user_cred.uid}) 
+
 
 
     // Stop the recorder instance
