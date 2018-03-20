@@ -38,10 +38,10 @@ class StudentDashboard extends React.Component {
       open_assessment_modal: false,
       finish_message: false
     }
-    this.StartAssessment = this.StartAssessment.bind(this);
+    // this.StartAssessment = this.StartAssessment.bind(this); - not used?
     this.CloseAssessment = this.CloseAssessment.bind(this);
     this.prepare_mindset = this.prepare_mindset.bind(this);
-    this.proceed_assignment = this.proceed_assignment.bind(this);
+    // this.proceed_assignment = this.proceed_assignment.bind(this); - not used?
     this.logout = this.logout.bind(this);
     this.start_countdown = this.start_countdown.bind(this);
     this.countdown = this.countdown.bind(this);
@@ -106,6 +106,7 @@ class StudentDashboard extends React.Component {
 
   prepare_mindset() {
     const {profile, user_cred, enrolledClasses, all_assignments} = this.props;
+    console.log("---> user_cred", user_cred)
     if (all_assignments.length>0){
       var active_assignment = all_assignments[0];
       this.props.dispatch(SetActiveAssignment(active_assignment));
@@ -131,8 +132,10 @@ class StudentDashboard extends React.Component {
     }
   }
 
-  proceed_assignment() {
+    // Is this method used?
+/*   proceed_assignment() {
     const {profile, user_cred, enrolledClasses, all_assignments, active_assignment} = this.props;
+
     firebase.database().ref(`student/${user_cred.uid}/assignment/${active_assignment.assignmentID}`).update({status:'initiated'})
     firebase.database().ref(`assignment/${active_assignment.assignmentID}/results`).update({status:'initiated'})
     this.setState({
@@ -142,6 +145,7 @@ class StudentDashboard extends React.Component {
       current_assignment: active_assignment.assignmentID
     })
   }
+   */
 
   start_countdown() {
     this.setState({prepartion: false, countdown_modal:true});
@@ -161,8 +165,11 @@ class StudentDashboard extends React.Component {
     }
   }
 
+  // This method is not being called.
+/* 
   StartAssessment(course, assessment, assignment) {
     const {user_cred} = this.props;
+    console.log("🐸🐸🐸🐸🐸🐸-- >user_cred1", user_cred1);
     this.setState({
       current_course: course,
       current_assessment: assessment,
@@ -182,6 +189,8 @@ class StudentDashboard extends React.Component {
       }
     }.bind(this))
   }
+ */
+
 
   CloseAssessment(){
     this.setState({
@@ -250,6 +259,7 @@ class StudentDashboard extends React.Component {
             </Table.Row>
           </Table.Header>
 
+
           <Table.Body>
             {all_assignments.map(function(assignment, key){
               if (!assignment.results){
@@ -276,6 +286,7 @@ class StudentDashboard extends React.Component {
                   var renderScore = new Number(assignment.results.scoreFromCompareWord*100).toFixed(0).toString() + '%';
                 }
               }
+
               return(
                 <Table.Row key={key}>
                   <Table.Cell>
@@ -314,6 +325,7 @@ class StudentDashboard extends React.Component {
             </Grid>
           </Modal.Content>
         </Modal>
+
         <Modal size='fullscreen' open={no_assignment} style={{height: '97vh'}}>
           <Modal.Content>
             <Grid textAlign='center'>
@@ -330,6 +342,7 @@ class StudentDashboard extends React.Component {
             </Grid>
           </Modal.Content>
         </Modal>
+
         <Modal size='fullscreen' open={prepartion} style={{height: '97vh'}}>
           <Modal.Content>
             <Grid textAlign='center'>
@@ -345,12 +358,13 @@ class StudentDashboard extends React.Component {
             </Grid>
           </Modal.Content>
         </Modal>
+
         <Modal size='fullscreen' open={countdown_modal} style={{height: '97vh'}}>
           <Modal.Content>
             <Grid textAlign='center'>
               <Grid.Row style={{height: '95vh'}}>
                 <Grid.Column verticalAlign='middle'>
-                  <Header as='h1' style={{fontSize: '10em'}}>
+                  <Header as='h1' style={{fontSize: '15em'}}>
                     {countdownSeconds}
                   </Header>
                 </Grid.Column>
@@ -358,6 +372,7 @@ class StudentDashboard extends React.Component {
             </Grid>
           </Modal.Content>
         </Modal>
+
         <Modal size='fullscreen' open={open_assessment_modal} style={{height: '97vh'}}>
           <Modal.Content>
             <Modal.Description>
@@ -371,10 +386,11 @@ class StudentDashboard extends React.Component {
                 </Item>
               </Item.Group>
               <Divider />
-              <AssessmentRecording CloseAssessment={this.CloseAssessment}/>
+              <AssessmentRecording CloseAssessment={this.CloseAssessment} currentAssessmentText={this.state.current_assessment_text}/>
             </Modal.Description>
           </Modal.Content>
         </Modal>
+
         <Modal size='fullscreen' open={finish_message} style={{height: '97vh'}}>
           <Modal.Content>
             <Grid textAlign='center'>
@@ -395,6 +411,7 @@ class StudentDashboard extends React.Component {
             </Grid>
           </Modal.Content>
         </Modal>
+
       </Segment>
     )
   }
