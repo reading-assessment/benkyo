@@ -71,6 +71,11 @@ class TeacherDashboard extends React.Component {
           snapshot.forEach(function(assignment){
             var assignmentId = assignment.key;
             var results = assignment.val().results;
+
+            // gmailUid
+            var gmailUid = assignment.val().gmailUid ? assignment.val().gmailUid : null;
+            console.log("gmailUid--->", gmailUid)
+
             var score = (results)?results.scoreFromCompareWord:null;
             var flacFile = (results)?results.publicFlacURL:null;
             var wordsPerMinute = (results)?results.transcribedWordsPerMinute:null;
@@ -85,10 +90,11 @@ class TeacherDashboard extends React.Component {
             }
             var obj = {
               assignmentId,
+              gmailUid, // new!
               email: assignment.val().studentInfo.emailAddress,
               name: assignment.val().studentInfo.name.fullName,
               assessment: assignment.val().assessment,
-              status: (results)?results.status:'Have not started',
+              status: (results)?results.status:'Not started',
               score: (score !== undefined && score !== null)?(score):null,
               flac: (flacFile)?(<audio controls preload='auto'><source src={flacFile} type="audio/flac"/></audio>):null,
               wordsPerMinute: (wordsPerMinute !== undefined && wordsPerMinute !== null)?wordsPerMinute:null,
@@ -181,14 +187,14 @@ class TeacherDashboard extends React.Component {
 
 
   handleCurrentLevel(name, email, assessmentID, assignmentId){
-
     this.setState({
       magnify_student: name,
       magnify_current_level: "Z (test)",
       adjust_student_level: true
     })
-
   }
+
+  
 
 
 
@@ -243,7 +249,7 @@ class TeacherDashboard extends React.Component {
                         </Table.Cell>
 
 
-                        <Table.Cell onClick={this.handleCurrentLevel.bind(this, assignment.name, assignment.email, assignment.assessment, assignment.assignmentId)}>COMING</Table.Cell>
+                        <Table.Cell onClick={this.handleCurrentLevel.bind(this, assignment.name, assignment.email, assignment.assessment, assignment.assignmentId)}>gmailUid-->{assignment.gmailUid ? assignment.gmailUid : "nada" }</Table.Cell>
 
 
                         <Table.Cell>{assignment.assessment}</Table.Cell>
