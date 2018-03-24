@@ -39,9 +39,6 @@ export default connect((store) => {
       firebase.database().ref(`assignment`).push(obj);
       this.props.dispatch(AssignItinStone()); // this sets done_selecting to TRUE
 
-      // FIREBASE CALL HERE TO UPDATE NEW SETTLING
-      // LATER  move the assignment of students level to occur after the assessment has occurred.
-
 
       // read the correct user
       console.log("STONE--> ID: ", obj.studentID);
@@ -120,7 +117,7 @@ export default connect((store) => {
       } else {
         var renderAssignment = (
           <Header as='h3'>
-            Click One of the Students to the Right to Assign an Assessment'
+            Click One of the Students on the Right to Assign an Assessment
         </Header>
         )
       }
