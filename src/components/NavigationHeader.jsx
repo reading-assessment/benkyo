@@ -20,6 +20,11 @@ class NavigationHeader extends React.Component {
     this.LogOut = this.LogOut.bind(this);
   }
 
+  changeTeacherDashboard(){
+    console.log("click!")
+  }
+
+
   LogOut() {
     firebase.auth().signOut().then(function() {
       // Sign-out successful.
@@ -58,6 +63,7 @@ class NavigationHeader extends React.Component {
                 {renderImportClassRoom}
                 {renderLogout}
               </Dropdown.Menu>
+
             </Dropdown>
           </Menu.Menu>
         </Container>

@@ -1,9 +1,12 @@
 import React from 'react';
+import { Route, Link, BrowserRouter as Router } from 'react-router-dom'; // remove this and line 130/134
+
 import { Segment, Header, Card, Dropdown, Button, Image, Item } from 'semantic-ui-react';
 import { connect } from 'react-redux';
 import axios from 'axios';
 import htmlToText from 'html-to-text';
 import { SelectAssessment, AssignItinStone } from './TeacherActions'
+
 
 export default connect((store) => {
   return {
@@ -122,9 +125,11 @@ export default connect((store) => {
         )
       }
       return (
-        <Segment vertical style={{ paddingTop: '0px' }}>
-          {renderAssignment}
-        </Segment>
+        <Router>
+          <Segment vertical style={{ paddingTop: '0px' }}>
+              {renderAssignment}
+            </Segment>
+        </Router>
       )
     }
   });
