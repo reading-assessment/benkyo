@@ -2,7 +2,9 @@ import React from 'react';
 import { Table, Checkbox, Button, Icon, Segment, Grid, Divider, Modal, Header, Dimmer } from 'semantic-ui-react';
 import { connect } from 'react-redux';
 import axios from 'axios';
-import { SetAllClassrooms, SetCurrentClassrooms, StoreAllAssessments, SetAllLiveAssignments } from './TeacherActions'
+
+import { SetListOfStudents, SetAllClassrooms, SetCurrentClassrooms, StoreAllAssessments, SetAllLiveAssignments } from './TeacherActions'
+
 import Promise from 'bluebird';
 import _ from 'lodash';
 import AssignAssessment from './AssignAssessment.jsx'
@@ -32,20 +34,15 @@ changeDashboardView(){
   this.setState({
     showAssignmentPanel: !this.state.showAssignmentPanel
   });
-
 }
 
 render(){
-  console.log(this.state.showAssignmentPanel);
   const { showAssignmentPanel }  = this.state;
 
-  
   return (
     <div>
       <button onClick={this.changeDashboardView}>Click to toggle View</button>
-
       {showAssignmentPanel ? <TeacherDashboard_Assignments /> : <TeacherDashboard_StudentRecords/>}
-
     </div>
   )
  }

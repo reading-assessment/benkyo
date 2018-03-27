@@ -2,25 +2,24 @@ import React from 'react';
 import { Table, Checkbox, Button, Icon, Segment, Grid, Divider, Modal, Header, Dimmer } from 'semantic-ui-react';
 import { connect } from 'react-redux';
 import axios from 'axios';
-import { SetAllClassrooms, SetCurrentClassrooms, StoreAllAssessments, SetAllLiveAssignments } from './TeacherActions'
+import { SetListOfStudents, SetAllClassrooms, SetCurrentClassrooms, StoreAllAssessments, SetAllLiveAssignments } from './TeacherActions';
 import Promise from 'bluebird';
 import _ from 'lodash';
-import AssignAssessment from './AssignAssessment.jsx'
-import TeacherDashboard_Assignments from './TeacherDashboard_Assignments.jsx'
+//import TeacherDashboard_Assignments from './TeacherDashboard_Assignments.jsx'
 import moment from 'moment'
 
 export default connect((store) => {
   return {
     user_cred: store.authentication.user_cred,
     live_assignments: store.teacher.live_assignments,
-    all_assessments: store.teacher.all_assessments
+    all_assessments: store.teacher.all_assessments,
+    currentStudentList: store.teacher.currentStudentList ? store.teacher.currentStudentList : []
   }
 })(
 class TeacherDashboard extends React.Component {
   constructor(props){
     super(props);
     this.state = {
-      teacherDashboardMode: 'assignments',
       more_details: false,
       magnify_assessmentID: null,
       magnify_flac: null,
@@ -30,19 +29,22 @@ class TeacherDashboard extends React.Component {
       magnify_current_level: null
     }
     this.handleSort = this.handleSort.bind(this)
-    this.handleCurrentLevel = this.handleCurrentLevel.bind(this)
-    this.handleDelete = this.handleDelete.bind(this)
     this.ViewMoreDetails = this.ViewMoreDetails.bind(this)
     this.resetModal = this.resetModal.bind(this);
   }
 
   componentDidMount() {
     const{user_cred, classrooms} = this.props;
+
+    /// ** - we iterate thought assessments, order them by key, add them to the store
     firebase.database().ref(`assessments`).orderByKey().once('value').then(function(snapshot){
       this.props.dispatch(StoreAllAssessments(snapshot.val()))
     }.bind(this))
+
+    // ** - new promise here, how does this connect? what is passed to line 50?
     new Promise (function(resolve, reject){
 
+      // ** - here we iterate over the classes the teacher has
       firebase.database().ref(`teacher/${user_cred.uid}/classes`).once('value').then(function(snapshot){
         var arrayOfClasses = [];
         var currentClassroom = null;
@@ -65,58 +67,45 @@ class TeacherDashboard extends React.Component {
       }.bind(this))
     }.bind(this))
     .then(function(currentClassroom){
-      // firebase.database().ref(`assignment`).orderByChild('courseID').equalTo(currentClassroom).once('value')
-      firebase.database().ref(`assignment`).once('value')
+
+
+    // firebase.database().ref(`assignment`).orderByChild('courseID').equalTo(currentClassroom).once('value')
+
+    // changed assignment to STUDENT
+      firebase.database().ref(`student`).once('value')
       .then(function(snapshot){
+
         if (snapshot.val()) {
-          var allLiveAssignments = [];
-          snapshot.forEach(function(assignment){
-            var assignmentId = assignment.key;
-            var results = assignment.val().results;
+          var allLiveSTUDENTS = [];
+          snapshot.forEach(function(STUDENT){
 
-            // gmailUid
-            var gmailUid = assignment.val().gmailUid ? assignment.val().gmailUid : null;
-            console.log("gmailUid--->", gmailUid)
-
-            var score = (results)?results.scoreFromCompareWord:null;
-            var flacFile = (results)?results.publicFlacURL:null;
-            var wordsPerMinute = (results)?results.transcribedWordsPerMinute:null;
-            var numOfRecordingSeconds = (results)?results.numOfRecordingSeconds:null;
-            var timeStamp = (results)?results.timeStamp:null;
-            var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-            var strDate = null;
-            if (timeStamp) {
-              timeStamp = Number(timeStamp);
-              var date = new Date(timeStamp);
-              strDate = months[date.getMonth()] +'-'+ date.getDay() + ' ' + date.getHours() + ':' + date.getMinutes();
-            }
+            const gmailUid = STUDENT.key;
+            const fullName = STUDENT.val().default_profile.name.fullName;
+            const firstName = STUDENT.val().default_profile.name.givenName;
+            const lastName = STUDENT.val().default_profile.name.familyName;
+            const currentFluencyScore = STUDENT.val().academicRecord ? STUDENT.val().academicRecord.currentReadingLevel : "unavail";
+            
             var obj = {
-              assignmentId,
-              gmailUid, // new!
-              email: assignment.val().studentInfo.emailAddress,
-              name: assignment.val().studentInfo.name.fullName,
-              assessment: assignment.val().assessment,
-              status: (results)?results.status:'Not started',
-              score: (score !== undefined && score !== null)?(score):null,
-              flac: (flacFile)?(<audio controls preload='auto'><source src={flacFile} type="audio/flac"/></audio>):null,
-              wordsPerMinute: (wordsPerMinute !== undefined && wordsPerMinute !== null)?wordsPerMinute:null,
-              numOfRecordingSeconds: (numOfRecordingSeconds !== undefined && numOfRecordingSeconds !== null)?numOfRecordingSeconds:null,
-              timeStamp: (timeStamp !== undefined && timeStamp !== null)?timeStamp:null,
-              strDate: (strDate !== undefined && strDate !== null)?strDate:null,
-              transcribedText: (assignment.val().results)?assignment.val().results.transcribedText:null
+              fullName,
+              firstName,
+              lastName,
+              gmailUid,
+              currentFluencyScore
             }
-            if (results) {
-              if (results.scoreFromFuzzySet){
-                obj['scoreFromFuzzySet'] = results.scoreFromFuzzySet;
-              }
-            }
-            allLiveAssignments.push(obj);
+
+            allLiveSTUDENTS.push(obj);
+
           });
-          this.props.dispatch(SetAllLiveAssignments(allLiveAssignments));
+
+          // update store, 
+          this.props.dispatch(SetListOfStudents(allLiveSTUDENTS));
         }
       }.bind(this))
     }.bind(this))
   }
+
+
+
 
   ViewMoreDetails(student, assessmentID, flac_info, transcribedText) {
     this.setState({
@@ -137,7 +126,6 @@ class TeacherDashboard extends React.Component {
       more_details: false, 
       adjust_student_level: false,
       magnify_current_level: "na"
-
     })
   }
 
@@ -157,140 +145,83 @@ class TeacherDashboard extends React.Component {
     this.setState({
       direction: direction === 'ascending' ? 'descending' : 'ascending',
     })
+
     this.props.dispatch(SetAllLiveAssignments(live_assignments.reverse()));
   }
 
-  handleDelete(assignmentId, email){
-    //console.log("assignmentId-->", assignmentId)
-    var confirmDelete = confirm('Are you sure you want to delete?');
-    if (confirmDelete) {
-      const {live_assignments} = this.props;
-      var liveAssignmentsCopy = live_assignments.slice(0);
-      _.remove(liveAssignmentsCopy, (item)=>{ return item.assignmentId === assignmentId });
-      this.props.dispatch(SetAllLiveAssignments(liveAssignmentsCopy));
-      var emailWithCommas = email.replace(/\./g, ',');
-      firebase.database().ref(`emailToUid/${emailWithCommas}`).once('value').then(function(snapshot){
-        if (snapshot.val()){
-          var clickedStudentUid = snapshot.val();
-          firebase.database().ref(`student/${clickedStudentUid}/assignment/${assignmentId}`).once('value').then(function(snapshot){
-            if (snapshot.val()) {
-              firebase.database().ref(`student/${clickedStudentUid}/assignment/${assignmentId}`).remove().then(function(snapshot){
-                // console.log("successful removed #1 ", assignmentId);
-              });
-            }
-          });
-        }
-      });
-      firebase.database().ref(`assignment/${assignmentId}`).remove().then(function (snapshot) {
-        // console.log("successful removed #2 ", assignmentId);
-      });
-    }
-  }
-
-
-  handleCurrentLevel(name, email, assessmentID, assignmentId){
-    this.setState({
-      magnify_student: name,
-      magnify_current_level: "Z (test)",
-      adjust_student_level: true
-    })
-  }
-
-  
 
 
 
   render() {
-    const { all_assessments, live_assignments, user_cred} = this.props;
+    const { currentStudentList, all_assessments, live_assignments, user_cred} = this.props;
     const {column, direction, more_details, magnify_student, 
       magnify_assessmentID,
       magnify_flac, 
       magnify_transcribedText, 
       adjust_student_level,
       magnify_current_level,
-      teacherDashboardMode
+      
     } = this.state;
 
+    
     return (
       <Segment vertical>
         <Grid stackable>
           <Grid.Row>
-            <Grid.Column width={11}>
-              <AssignAssessment/>
+            <Grid.Column width={15}>
+            <h3>Student Records</h3>
+     
               <Table celled sortable>
                 <Table.Header>
                   <Table.Row>
-                    <Table.HeaderCell sorted={column === 'name' ? direction : null} onClick={()=>{this.handleSort('name')}}>Student</Table.HeaderCell>
-                    <Table.HeaderCell>Current Level</Table.HeaderCell>
-                    <Table.HeaderCell sorted={column === 'assessment' ? direction : null} onClick={()=>{this.handleSort('assessment')}}>Assessment</Table.HeaderCell>
-                    <Table.HeaderCell sorted={column === 'status' ? direction : null} onClick={()=>{this.handleSort('status')}}>Status</Table.HeaderCell>
-                    <Table.HeaderCell>Time</Table.HeaderCell>
-                    <Table.HeaderCell sorted={column === 'score' ? direction : null} onClick={()=>{this.handleSort('score')}}>Raw Score</Table.HeaderCell>
-                    <Table.HeaderCell>Recording</Table.HeaderCell>
-                    <Table.HeaderCell>Delete</Table.HeaderCell>
+
+                    <Table.HeaderCell sorted={column === 'last_name' ? direction : null } onClick={()=>{this.handleSort('last_name')}}>Last</Table.HeaderCell>
+
+                    <Table.HeaderCell sorted={column === 'first_name' ? direction : null } onClick={()=>{this.handleSort('first_name')}}>First</Table.HeaderCell>
+
+                    <Table.HeaderCell sorted={column === 'current_level' ? direction : null} onClick={() => { this.handleSort('current_level') }}>Current Level</Table.HeaderCell>
+
+                    <Table.HeaderCell sorted={column === 'average_wpm' ? direction : null} onClick={() => { this.handleSort('average_wpm')}}>Average WPM</Table.HeaderCell>
+
+                    <Table.HeaderCell sorted={column === 'recent_assessment' ? direction : null} onClick={() => { this.handleSort('recent_assessment')}} >Recordings</Table.HeaderCell>
+
+      
                   </Table.Row>
                 </Table.Header>
 
                 <Table.Body>
-                  {live_assignments.map((assignment, key)=>{
-                    if (assignment.scoreFromFuzzySet) {
-                      var renderFuzzyScore = (
-                        <div>
-                          <Divider/>
-                          {new Number(assignment.scoreFromFuzzySet*100).toFixed(0).toString() + '%'}
-                        </div>
-                      )
-                    }
+                  {currentStudentList.map((studentRecord, key)=>{
+  
                     return (
                       <Table.Row key={key}>
+
                         <Table.Cell>
-                          <Segment vertical style={{padding: '0px'}}>
-                            {assignment.name}
+                          <Segment vertical style={{ padding: '0px' }}>
+                            {studentRecord.lastName}
                           </Segment>
                         </Table.Cell>
 
-
-                        <Table.Cell onClick={this.handleCurrentLevel.bind(this, assignment.name, assignment.email, assignment.assessment, assignment.assignmentId)}>gmailUid-->{assignment.gmailUid ? assignment.gmailUid : "nada" }</Table.Cell>
-
-
-                        <Table.Cell>{assignment.assessment}</Table.Cell>
-                        <Table.Cell>{assignment.status}{teacherDashboardMode}</Table.Cell>
                         <Table.Cell>
-                          {/*{(assignment.timeStamp)?moment(assignment.timeStamp).format("ddd, MMM D, h:mm"):null}*/} 
-                          {(assignment.timeStamp)?moment(assignment.timeStamp).format("MMM D, h:mm"):null}
-                          <Divider/>
-                          {(assignment.numOfRecordingSeconds)?`${new Number(assignment.numOfRecordingSeconds).toFixed(0)} Seconds`:null}
-                          <Divider/>
-                          {(assignment.wordsPerMinute)?<strong>{assignment.wordsPerMinute} WPM</strong>:null}
-                        </Table.Cell>
-                        <Table.Cell>
-                          {(assignment.score)?(
-                            <span>{new Number(assignment.score*100).toFixed(0).toString() + '%'}</span>
-                          ):null}
-                          {renderFuzzyScore}
-                          {(assignment.score<.40 && assignment.score)?(
-                            <span>
-                              <Divider/>
-                              Unfinished?
-                            </span>
-                          ):null}
+                          <Segment vertical style={{ padding: '0px' }}>
+                            {studentRecord.firstName}
+                          </Segment>
                         </Table.Cell>
 
                         <Table.Cell>
-                          <Button icon='folder open outline' fluid onClick={()=>{this.ViewMoreDetails(assignment.name, assignment.assessment, assignment.flac, assignment.transcribedText)}}/>
+                            {studentRecord.currentFluencyScore}    
                         </Table.Cell>
 
-                        <Table.Cell textAlign="center">
-                          <Button icon='delete' fluid color='red' onClick={()=>{this.handleDelete(assignment.assignmentId, assignment.email)}}/>
-                          </Table.Cell>
+                        <Table.Cell>coming</Table.Cell>
+ 
+                        <Table.Cell>coming</Table.Cell>
+
                       </Table.Row>
                     )
                   })}
+
+
                 </Table.Body>
               </Table>
-            </Grid.Column>
-            <Grid.Column width={5}>
-              <ClassroomByGoogle/>
             </Grid.Column>
           </Grid.Row>
         </Grid>
@@ -298,7 +229,7 @@ class TeacherDashboard extends React.Component {
         <Modal open={more_details} onClose={this.resetModal} closeIcon>
           <Modal.Header>
             <Segment vertical style={{padding: '0px'}}>
-            {magnify_student}
+            {magnify_student}'s Recordings - scroll through recordings here.
             </Segment>
           </Modal.Header>
           <Modal.Content>
@@ -325,3 +256,101 @@ class TeacherDashboard extends React.Component {
       )
     }
 });
+
+
+
+
+/* 
+
+componentDidMount() {
+  const { user_cred, classrooms } = this.props;
+
+
+
+  firebase.database().ref(`assessments`).orderByKey().once('value').then(function (snapshot) {
+    this.props.dispatch(StoreAllAssessments(snapshot.val()))
+  }.bind(this))
+  new Promise(function (resolve, reject) {
+
+    firebase.database().ref(`teacher/${user_cred.uid}/classes`).once('value').then(function (snapshot) {
+      var arrayOfClasses = [];
+      var currentClassroom = null;
+      // How does this works, as it sores an array with the -primary content and the class content?
+      snapshot.forEach(function (classes) {
+        arrayOfClasses.push(classes.val());
+        if (!currentClassroom) {
+          // does it resolve ONLY in the first classroom that it finds?
+          currentClassroom = classes.val();
+          // console.log(currentClassroom);
+          resolve(currentClassroom);
+          firebase.database().ref(`/classes/${currentClassroom}`).once('value').then(function (snapshot) {
+            if (snapshot.val()) {
+              this.props.dispatch(SetCurrentClassrooms(snapshot.val()));
+            }
+          }.bind(this))
+        }
+      }.bind(this));
+      this.props.dispatch(SetAllClassrooms(arrayOfClasses));
+    }.bind(this))
+  }.bind(this))
+    .then(function (currentClassroom) {
+      // firebase.database().ref(`assignment`).orderByChild('courseID').equalTo(currentClassroom).once('value')
+
+
+      // what us happening above?
+      // NEXT: ITERATE THROUGH 'STUDENT' 
+      // MAYBE JUST REWRITE componentDidMount?
+
+
+      firebase.database().ref(`assignment`).once('value')
+        .then(function (snapshot) {
+          if (snapshot.val()) {
+            var allLiveAssignments = [];
+            snapshot.forEach(function (assignment) {
+              var assignmentId = assignment.key;
+              var results = assignment.val().results;
+
+              // gmailUid
+              var gmailUid = assignment.val().gmailUid ? assignment.val().gmailUid : null;
+              console.log("gmailUid--->", gmailUid)
+
+              var score = (results) ? results.scoreFromCompareWord : null;
+              var flacFile = (results) ? results.publicFlacURL : null;
+              var wordsPerMinute = (results) ? results.transcribedWordsPerMinute : null;
+              var numOfRecordingSeconds = (results) ? results.numOfRecordingSeconds : null;
+              var timeStamp = (results) ? results.timeStamp : null;
+              var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+              var strDate = null;
+              if (timeStamp) {
+                timeStamp = Number(timeStamp);
+                var date = new Date(timeStamp);
+                strDate = months[date.getMonth()] + '-' + date.getDay() + ' ' + date.getHours() + ':' + date.getMinutes();
+              }
+              var obj = {
+                assignmentId,
+                gmailUid, // new!
+                email: assignment.val().studentInfo.emailAddress,
+                name: assignment.val().studentInfo.name.fullName,
+                assessment: assignment.val().assessment,
+                status: (results) ? results.status : 'Not started',
+                score: (score !== undefined && score !== null) ? (score) : null,
+                flac: (flacFile) ? (<audio controls preload='auto'><source src={flacFile} type="audio/flac" /></audio>) : null,
+                wordsPerMinute: (wordsPerMinute !== undefined && wordsPerMinute !== null) ? wordsPerMinute : null,
+                numOfRecordingSeconds: (numOfRecordingSeconds !== undefined && numOfRecordingSeconds !== null) ? numOfRecordingSeconds : null,
+                timeStamp: (timeStamp !== undefined && timeStamp !== null) ? timeStamp : null,
+                strDate: (strDate !== undefined && strDate !== null) ? strDate : null,
+                transcribedText: (assignment.val().results) ? assignment.val().results.transcribedText : null
+              }
+              if (results) {
+                if (results.scoreFromFuzzySet) {
+                  obj['scoreFromFuzzySet'] = results.scoreFromFuzzySet;
+                }
+              }
+              allLiveAssignments.push(obj);
+            });
+            this.props.dispatch(SetAllLiveAssignments(allLiveAssignments));
+          }
+        }.bind(this))
+    }.bind(this))
+}
+ */

@@ -2,7 +2,7 @@ import React from 'react';
 import { Table, Checkbox, Button, Icon, Segment, Grid, Divider, Modal, Header, Dimmer } from 'semantic-ui-react';
 import { connect } from 'react-redux';
 import axios from 'axios';
-import { SetAllClassrooms, SetCurrentClassrooms, StoreAllAssessments, SetAllLiveAssignments } from './TeacherActions'
+import { SetListOfStudents, SetAllClassrooms, SetCurrentClassrooms, StoreAllAssessments, SetAllLiveAssignments } from './TeacherActions';
 import Promise from 'bluebird';
 import _ from 'lodash';
 import AssignAssessment from './AssignAssessment.jsx'
@@ -67,6 +67,7 @@ class TeacherDashboard extends React.Component {
       // firebase.database().ref(`assignment`).orderByChild('courseID').equalTo(currentClassroom).once('value')
       firebase.database().ref(`assignment`).once('value')
       .then(function(snapshot){
+       // console.log("assignment snapshots.val==>", snapshot.val() )
         if (snapshot.val()) {
           var allLiveAssignments = [];
           snapshot.forEach(function(assignment){
@@ -198,7 +199,6 @@ class TeacherDashboard extends React.Component {
   
 
 
-
   render() {
     const { all_assessments, live_assignments, user_cred} = this.props;
     const {column, direction, more_details, magnify_student, 
@@ -219,8 +219,7 @@ class TeacherDashboard extends React.Component {
               <Table celled sortable>
                 <Table.Header>
                   <Table.Row>
-                    <Table.HeaderCell sorted={column === 'name' ? direction : null} onClick={()=>{this.handleSort('name')}}>Student!!!</Table.HeaderCell>
-                    <Table.HeaderCell>Current Level</Table.HeaderCell>
+                    <Table.HeaderCell sorted={column === 'name' ? direction : null} onClick={()=>{this.handleSort('name')}}>Student</Table.HeaderCell>
                     <Table.HeaderCell sorted={column === 'assessment' ? direction : null} onClick={()=>{this.handleSort('assessment')}}>Assessment</Table.HeaderCell>
                     <Table.HeaderCell sorted={column === 'status' ? direction : null} onClick={()=>{this.handleSort('status')}}>Status</Table.HeaderCell>
                     <Table.HeaderCell>Time</Table.HeaderCell>
@@ -247,15 +246,9 @@ class TeacherDashboard extends React.Component {
                             {assignment.name}
                           </Segment>
                         </Table.Cell>
-
-
-                        <Table.Cell onClick={this.handleCurrentLevel.bind(this, assignment.name, assignment.email, assignment.assessment, assignment.assignmentId)}>gmailUid-->{assignment.gmailUid ? assignment.gmailUid : "nada" }</Table.Cell>
-
-
                         <Table.Cell>{assignment.assessment}</Table.Cell>
-                        <Table.Cell>{assignment.status}{teacherDashboardMode}</Table.Cell>
+                        <Table.Cell>{assignment.status}</Table.Cell>
                         <Table.Cell>
-                          {/*{(assignment.timeStamp)?moment(assignment.timeStamp).format("ddd, MMM D, h:mm"):null}*/} 
                           {(assignment.timeStamp)?moment(assignment.timeStamp).format("MMM D, h:mm"):null}
                           <Divider/>
                           {(assignment.numOfRecordingSeconds)?`${new Number(assignment.numOfRecordingSeconds).toFixed(0)} Seconds`:null}
