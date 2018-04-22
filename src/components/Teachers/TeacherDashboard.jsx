@@ -1,15 +1,17 @@
 import React from 'react';
+import { BrowserRouter, Route, Switch } from 'react-router-dom';
 import { Table, Checkbox, Button, Icon, Segment, Grid, Divider, Modal, Header, Dimmer } from 'semantic-ui-react';
 import { connect } from 'react-redux';
 import axios from 'axios';
-
-import { SetListOfStudents, SetAllClassrooms, SetCurrentClassrooms, StoreAllAssessments, SetAllLiveAssignments } from './TeacherActions'
-
 import Promise from 'bluebird';
 import _ from 'lodash';
 import AssignAssessment from './AssignAssessment.jsx'
-import TeacherDashboard_Assignments from './TeacherDashboard_Assignments.jsx'
-import TeacherDashboard_StudentRecords from './TeacherDashboard_StudentRecords.jsx'
+
+import TeacherDashboardHeader from './TeacherDashboard_Header.jsx'
+import TeacherDashboardAssignments from './TeacherDashboard_Assignments.jsx'
+import TeacherDashboardStudents from './TeacherDashboard_StudentRecords.jsx'
+import TeacherDashboardAssessments from './TeacherDashboard_Assessments.jsx'
+import TeacherDashboardHome from './TeacherDashboard_Home.jsx'
 import moment from 'moment'
 
 @connect((store) => {
@@ -40,10 +42,20 @@ render(){
   const { showAssignmentPanel }  = this.state;
 
   return (
-    <div>
-      <button onClick={this.changeDashboardView}>Click to toggle View</button>
-      {showAssignmentPanel ? <TeacherDashboard_Assignments /> : <TeacherDashboard_StudentRecords/>}
-    </div>
+    <BrowserRouter>
+      <div>
+      <TeacherDashboardHeader/>
+      <Switch>
+          <Route exact path="/" component={TeacherDashboardHome} />
+          <Route path="/students" component={TeacherDashboardStudents} />
+          <Route path="/assignments" component={TeacherDashboardAssignments} />
+          <Route path="/assessments" component={TeacherDashboardAssessments} />
+      </Switch>
+
+
+
+      </div>
+    </BrowserRouter>
   )
  }
 }

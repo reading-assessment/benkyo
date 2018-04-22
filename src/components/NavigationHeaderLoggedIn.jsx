@@ -11,7 +11,7 @@ export default connect((store) => {
     role: store.authentication.role,
   }
 })(
-class NavigationHeader extends React.Component {
+class NavigationHeaderLoggedIn extends React.Component {
   constructor(props){
     super(props);
     this.state = {
@@ -56,6 +56,7 @@ class NavigationHeader extends React.Component {
     return (
       <Menu fixed='top' size="large">
         <Container>
+          stuff here
           <Menu.Menu position='right'>
             <Dropdown item icon='user circle outline' simple>
               <Dropdown.Menu>
@@ -63,6 +64,7 @@ class NavigationHeader extends React.Component {
                 {renderImportClassRoom}
                 {renderLogout}
               </Dropdown.Menu>
+
             </Dropdown>
           </Menu.Menu>
         </Container>
@@ -70,5 +72,3 @@ class NavigationHeader extends React.Component {
     )
   }
 })
-
-

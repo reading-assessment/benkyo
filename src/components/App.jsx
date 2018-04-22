@@ -1,4 +1,7 @@
 import React from 'react';
+
+import { BrowserRouter } from 'react-router-dom';
+
 import { Container, Segment, Menu, Dimmer, Loader, Image } from 'semantic-ui-react';
 import { connect } from 'react-redux';
 import axios from 'axios';
@@ -8,6 +11,7 @@ import {SetMainView, SetUserCred, SetMainRole, SetClassInfo} from './Authenticat
 import NavigationHeader from './NavigationHeader.jsx'
 import TeacherLogin from './Teachers/Login/TeacherLogin.jsx'
 import TeacherDashboard from './Teachers/TeacherDashboard.jsx'
+
 import StudentLogin from './Students/Login/StudentLogin.jsx'
 import StudentDashboard from './Students/StudentDashboard.jsx'
 
@@ -197,12 +201,15 @@ export default class App extends React.Component {
     }
 
     return (
-      <div>
-        <NavigationHeader />
-        <Container style={{marginTop: '70px'}}>
-          {renderLogin}
-        </Container>
-      </div>
+
+        <BrowserRouter>
+          <div>
+            <NavigationHeader />
+            <Container style={{marginTop: '70px'}}>
+            {renderLogin}
+            </Container>
+          </div>
+        </BrowserRouter>
     )
   }
 }
@@ -215,3 +222,4 @@ window.App = connect((store) => {
     role: store.authentication.role
   }
 })(App);
+

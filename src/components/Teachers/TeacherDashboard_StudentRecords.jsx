@@ -223,6 +223,10 @@ class TeacherDashboard extends React.Component {
                 </Table.Body>
               </Table>
             </Grid.Column>
+            <Grid.Column width={5}>
+              <ClassroomByGoogle />
+              <ClassroomByGoogle />
+            </Grid.Column>
           </Grid.Row>
         </Grid>
 
