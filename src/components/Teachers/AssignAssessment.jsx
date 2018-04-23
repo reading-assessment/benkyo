@@ -1,9 +1,12 @@
 import React from 'react';
+import { Route, Link, BrowserRouter as Router } from 'react-router-dom'; // remove this and line 130/134
+
 import { Segment, Header, Card, Dropdown, Button, Image, Item } from 'semantic-ui-react';
 import { connect } from 'react-redux';
 import axios from 'axios';
 import htmlToText from 'html-to-text';
 import { SelectAssessment, AssignItinStone } from './TeacherActions'
+
 
 export default connect((store) => {
   return {
@@ -38,9 +41,6 @@ export default connect((store) => {
       };
       firebase.database().ref(`assignment`).push(obj);
       this.props.dispatch(AssignItinStone()); // this sets done_selecting to TRUE
-
-      // FIREBASE CALL HERE TO UPDATE NEW SETTLING
-      // LATER  move the assignment of students level to occur after the assessment has occurred.
 
 
       // read the correct user
@@ -120,14 +120,16 @@ export default connect((store) => {
       } else {
         var renderAssignment = (
           <Header as='h3'>
-            Click One of the Students to the Right to Assign an Assessment'
+            Click One of the Students on the Right to Assign an Assessment
         </Header>
         )
       }
       return (
-        <Segment vertical style={{ paddingTop: '0px' }}>
-          {renderAssignment}
-        </Segment>
+        <Router>
+          <Segment vertical style={{ paddingTop: '0px' }}>
+              {renderAssignment}
+            </Segment>
+        </Router>
       )
     }
   });

@@ -1,3 +1,13 @@
+// --- TEST: for academic record page ----
+export function SetListOfStudents (currentStudentList) {
+  return {
+    type: 'SET_ALL_STUDENTS_IN_CLASS',
+    payload: {
+      currentStudentList: currentStudentList
+    }
+  }
+}
+
 export function SetCurrentClassrooms (currentClassroom) {
   return {
     type: 'SET_CURRENT_CLASSROOM',

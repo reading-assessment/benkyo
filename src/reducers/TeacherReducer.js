@@ -8,47 +8,64 @@ export default function reducer( state = {
     done_selecting: false,
   }, action ) {
   switch (action.type) {
+
+    // --- TEST: for academic record page ----
+    case 'SET_ALL_STUDENTS_IN_CLASS': {
+      return {...state,
+        currentStudentList: action.payload.currentStudentList
+      }
+    }
+
+
     case 'SET_ALL_CLASSROOMS': {
       return {...state,
         classrooms: action.payload.classrooms
       }
     }
+
     case 'SET_CURRENT_CLASSROOM': {
       return {...state,
         currentClassroom: action.payload.currentClassroom
       }
     }
+
     case 'SET_ALL_LIVE_ASSIGNMENTS': {
       return {...state,
         live_assignments: action.payload.live_assignments
       }
     }
+
     case 'SET_TARGET_STUDENT': {
       return {...state,
         current_target_student: action.payload.current_target_student
       }
     }
+
     case 'STORE_ALL_ASSESSMENTS': {
       return {...state,
         all_assessments: action.payload.all_assessments
       }
     }
+
     case 'ASSIGN_ASSESSMENT': {
       return {...state,
         selected_assessment: action.payload.selected_assessment
       }
     }
+
     case 'RECORD_ASSIGNMENT': {
       return {...state,
         done_selecting: true
       }
     }
+
     case 'RESET_SELECT_ASSESSMENT': {
       return {...state,
         done_selecting: false,
         selected_assessment: null
       }
     }
+
     case 'TEACHER_LOG_OUT': {
       return {...state,
         currentClassroom: {},
@@ -60,6 +77,7 @@ export default function reducer( state = {
         done_selecting: false
       }
     }
+
   }
   return state;
 }
